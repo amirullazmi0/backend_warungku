@@ -14,11 +14,13 @@ datasource db {
 }
 
 model user {
-  email        String         @id @unique @db.VarChar(100)
+  id           String         @id @unique @db.VarChar(100)
+  email        String         @unique @db.VarChar(100)
   fullName     String         @unique @db.VarChar(200)
   images       String?        @db.VarChar(255)
   password     String         @db.VarChar(250)
   address      String?        @db.Text()
+  accessToken  String?        @db.VarChar(250)
   refreshToken String?        @db.VarChar(250)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -47,8 +49,8 @@ model stores {
   logo        String?    @db.VarChar()
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  user        user       @relation(fields: [userEmail], references: [email])
-  userEmail   String     @db.VarChar(100)
+  user        user       @relation(fields: [userId], references: [id])
+  userId      String     @db.VarChar(100)
   itemStore   itemStore? @relation(fields: [itemStoreId], references: [id])
   itemStoreId String?    @db.VarChar(255)
 
@@ -77,8 +79,8 @@ model transactions {
   updatedAt   DateTime  @updatedAt
   itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
   itemStoreId String    @db.VarChar(255)
-  user        user      @relation(fields: [userEmail], references: [email])
-  userEmail   String    @db.VarChar(100)
+  user        user      @relation(fields: [userId], references: [id])
+  userId      String    @db.VarChar(100)
 
   @@map("transactions")
 }
