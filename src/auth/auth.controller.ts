@@ -39,4 +39,14 @@ export class AuthController {
     ) {
         return this.authService.login(req, res)
     }
+
+    @Post('/logout/user')
+    async logoutUser() {
+        
+    }
+
+    @Post('/logout/store')
+    async logoutStore() {
+
+    }
 }

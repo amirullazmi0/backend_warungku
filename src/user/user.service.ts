@@ -21,9 +21,8 @@ export class UserService {
 
       user = await this.prismaService.user.findMany({
         include: {
-          _count: true,
           roles: true,
-          transactions: true,
+          // transactions: true,
         },
       });
       if (id) {
@@ -56,5 +55,5 @@ export class UserService {
     }
   }
 
-  
+
 }
