@@ -1,29 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotAcceptableException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { user } from '@prisma/client';
 import { randomUUID } from 'crypto';
-import { getDataFailed, getDataSuccess, registerSuccess } from 'model/message';
-import { userCreateRequest, userCreateSchema } from 'model/user.model';
+import { emailIsUnique, getDataFailed, getDataSuccess, registerFailed, registerSuccess } from 'model/message';
+import { userCRUDResponse, userCreateRequest, userCreateSchema } from 'model/user.model';
 import { WebResponse } from 'model/web.model';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class UserService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
-  async getData(
-    id?: string,
-  ): Promise<WebResponse<{ record: number | undefined; user: user[] | user }>> {
+  async getData(id?: string): Promise<WebResponse<{ record: number | undefined; user: user[] | user; }>> {
     try {
       let user: user | user[];
+
       user = await this.prismaService.user.findMany({
         include: {
           _count: true,
           roles: true,
-          stores: true,
           transactions: true,
         },
       });
@@ -35,17 +34,17 @@ export class UserService {
           include: {
             _count: true,
             roles: true,
-            stores: true,
             transactions: true,
           },
         });
       }
+
       return {
         success: true,
         message: getDataSuccess,
         data: {
           record: Array.isArray(user) ? user.length : undefined,
-          user: user,
+          user: user
         },
       };
     } catch (error) {
@@ -57,40 +56,129 @@ export class UserService {
     }
   }
 
-  async register(req: userCreateRequest): Promise<WebResponse<user>> {
-    let refreshToken = this.jwtService.signAsync({
-      email: req.email,
-      full: req.fullName,
-    });
+  async register(req: userCreateRequest): Promise<WebResponse<userCRUDResponse>> {
+    try {
+      let refreshToken = this.jwtService.sign({
+        email: req.email,
+        full: req.fullName,
+      });
 
-    const rolesName = 'user';
+      let rolesName = 'user';
 
-    const validate = userCreateSchema.parse({
-      email: req.email,
-      fullName: req.fullName,
-      password: req.password,
-      address: req.address,
-      images: req.images,
-      refreshToken: refreshToken,
-    });
-
-    let id = randomUUID();
-
-    const create = await this.prismaService.user.create({
-      data: {
-        id: id,
-        email: validate.email,
-        fullName: validate.fullName,
-        password: validate.password,
-        refreshToken: validate.refreshToken,
-        address: validate.address,
+      const validate = userCreateSchema.parse({
+        email: req.email,
+        fullName: req.fullName,
+        password: req.password,
+        address: req.address,
+        images: req.images,
         rolesName: rolesName,
-      },
-    });
-    return {
-      success: true,
-      message: registerSuccess,
-      data: create,
-    };
+        refreshToken: refreshToken,
+      });
+
+      let id = randomUUID();
+
+      const unique = await this.prismaService.user.findFirst({
+        where: {
+          email: validate.email
+        }
+      })
+
+      if (unique) {
+        throw new ConflictException(emailIsUnique)
+      }
+
+      const bcryptPassword = await bcrypt.hash(validate.password, 10)
+
+      const create = await this.prismaService.user.create({
+        data: {
+          id: id,
+          email: validate.email,
+          fullName: validate.fullName,
+          password: bcryptPassword,
+          refreshToken: validate.refreshToken,
+          address: validate.address,
+          rolesName: rolesName,
+        },
+      });
+      return {
+        success: true,
+        message: registerSuccess,
+        data: {
+          email: create.email,
+          fullName: create.fullName,
+          accessToken: create.accessToken,
+          refreshToken: create.refreshToken
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: registerFailed,
+        errors: error
+      }
+    }
+  }
+
+  async registerSuper(req: userCreateRequest): Promise<WebResponse<userCRUDResponse>> {
+    try {
+      let refreshToken = this.jwtService.sign({
+        email: req.email,
+        full: req.fullName,
+      });
+
+      let rolesName = 'super';
+
+      const validate = userCreateSchema.parse({
+        email: req.email,
+        fullName: req.fullName,
+        password: req.password,
+        address: req.address,
+        images: req.images,
+        rolesName: rolesName,
+        refreshToken: refreshToken,
+      });
+
+      let id = randomUUID();
+
+      const unique = await this.prismaService.user.findFirst({
+        where: {
+          email: validate.email
+        }
+      })
+
+      if (unique) {
+        throw new ConflictException(emailIsUnique)
+      }
+
+      const bcryptPassword = await bcrypt.hash(validate.password, 10)
+
+      const create = await this.prismaService.user.create({
+        data: {
+          id: id,
+          email: validate.email,
+          fullName: validate.fullName,
+          password: bcryptPassword,
+          refreshToken: validate.refreshToken,
+          address: validate.address,
+          rolesName: rolesName,
+        },
+      });
+      return {
+        success: true,
+        message: registerSuccess,
+        data: {
+          email: create.email,
+          fullName: create.fullName,
+          accessToken: create.accessToken,
+          refreshToken: create.refreshToken
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: registerFailed,
+        errors: error
+      }
+    }
   }
 }

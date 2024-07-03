@@ -10,6 +10,12 @@ export class userCreateRequest {
   //   accessToken?: string;
   //   refreshToken: string;
 }
+export class userCRUDResponse {
+  email: string;
+  fullName: string;
+  accessToken?: string;
+  refreshToken?: string;
+}
 
 export const userCreateSchema = z.object({
   email: z.string().min(1, 'email is required').email('Invalid email address'),
@@ -17,10 +23,10 @@ export const userCreateSchema = z.object({
     .string()
     .min(1, 'full name is required')
     .max(200, 'full name is too long'),
-  images: z.string().nullable(),
+  images: z.string().optional(),
   password: z.string().min(1, 'password is required'),
-  address: z.string().nullable(),
+  address: z.string().optional(),
   rolesName: z.string().min(1, 'rolesName is required'),
-  accessToken: z.string().nullable(),
+  accessToken: z.string().optional(),
   refreshToken: z.string().min(1, 'refresh token is required'),
 });
