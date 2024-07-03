@@ -28,7 +28,7 @@ export class AuthService {
             if (!user) {
                 throw new BadRequestException(accountNotRegister)
             }
-            const isPasswordValid = await bcrypt.compare(req.password,user.password)
+            const isPasswordValid = await bcrypt.compare(req.password, user.password)
 
             if (!isPasswordValid) {
                 throw new BadRequestException(emailPassworWrong)
@@ -36,8 +36,7 @@ export class AuthService {
 
             const access_token = await this.jwtService.sign({
                 email: user.email,
-                fullName: user.fullName,
-                roles: user.rolesName
+                roles: 'user'
             })
 
             user = await this.prismaService.user.update({
