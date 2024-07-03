@@ -14,32 +14,33 @@ datasource db {
 }
 
 model user {
-  id           String         @id @unique @db.VarChar(100)
-  email        String         @unique @db.VarChar(100)
+  id           String         @id @unique @db.VarChar(255)
+  email        String         @unique @db.VarChar(255)
   fullName     String         @db.VarChar(200)
   images       String?        @db.VarChar(255)
-  password     String         @db.VarChar(250)
+  password     String         @db.VarChar(255)
   address      String?        @db.Text()
-  accessToken  String?        @db.VarChar(250)
-  refreshToken String?        @db.VarChar(250)
+  accessToken  String?        @db.VarChar(255)
+  refreshToken String?        @db.VarChar(255)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   roles        roles          @relation(fields: [rolesName], references: [name])
   rolesName    String         @db.VarChar(255)
   transactions transactions[]
+  wishList     wishList[]
 
   @@map("users")
 }
 
 model store {
-  id           String         @id @unique @db.VarChar(100)
+  id           String         @id @unique @db.VarChar(255)
   fullName     String         @db.VarChar(255)
   Bio          String?        @db.Text()
   address      String?        @db.Text()
   logo         String?        @db.VarChar()
-  password     String         @db.VarChar(250)
-  accessToken  String?        @db.VarChar(250)
-  refreshToken String?        @db.VarChar(250)
+  password     String         @db.VarChar(255)
+  accessToken  String?        @db.VarChar(255)
+  refreshToken String?        @db.VarChar(255)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   itemStore    itemStore?     @relation(fields: [itemStoreId], references: [id])
@@ -70,8 +71,29 @@ model itemStore {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   transactions transactions[]
+  wishList     wishList[]
+  shoppingCart shoppingCart[]
 
   @@map("itemStores")
+}
+
+model wishList {
+  id          String    @id @unique @db.VarChar(255)
+  user        user      @relation(fields: [userId], references: [id])
+  itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
+  itemStoreId String    @db.VarChar(255)
+  userId      String    @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model shoppingCart {
+  id          String    @id @unique @db.VarChar(255)
+  itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
+  itemStoreId String    @db.VarChar(255)
+  total       Int       @db.Integer
+  reatedAt    DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model transactions {
@@ -82,9 +104,9 @@ model transactions {
   itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
   itemStoreId String    @db.VarChar(255)
   user        user      @relation(fields: [userId], references: [id])
-  userId      String    @db.VarChar(100)
+  userId      String    @db.VarChar(255)
   store       store     @relation(fields: [storesId], references: [id])
-  storesId    String    @db.VarChar(100)
+  storesId    String    @db.VarChar(255)
 
   @@map("transactions")
 }
