@@ -59,8 +59,7 @@ export class UserService {
   async register(req: userCreateRequest): Promise<WebResponse<userCRUDResponse>> {
     try {
       let refreshToken = this.jwtService.sign({
-        email: req.email,
-        full: req.fullName,
+        email: req.email
       });
 
       let rolesName = 'user';
@@ -122,8 +121,7 @@ export class UserService {
   async registerSuper(req: userCreateRequest): Promise<WebResponse<userCRUDResponse>> {
     try {
       let refreshToken = this.jwtService.sign({
-        email: req.email,
-        full: req.fullName,
+        email: req.email
       });
 
       let rolesName = 'super';

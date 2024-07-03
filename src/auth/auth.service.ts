@@ -1,4 +1,75 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { authLoginRequestSchema, authLoginUserResponse, authloginUserRequest } from 'model/auth.model';
+import { accountNotRegister, authLoginFailed, authLoginSuccess, emailPassworWrong } from 'model/message';
+import { WebResponse } from 'model/web.model';
+import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from "bcrypt";
+import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
 
 @Injectable()
-export class AuthService {}
+export class AuthService {
+    constructor(
+        private prismaService: PrismaService,
+        private jwtService: JwtService
+    ) { }
+
+    async login(req: authloginUserRequest, res: Response): Promise<WebResponse<authLoginUserResponse>> {
+        try {
+            const validate = authLoginRequestSchema.parse({
+                email: req.email,
+                password: req.password
+            })
+
+            let user = await this.prismaService.user.findFirst({
+                where: { email: validate.email }
+            })
+
+            if (!user) {
+                throw new BadRequestException(accountNotRegister)
+            }
+            const isPasswordValid = await bcrypt.compare(req.password,user.password)
+
+            if (!isPasswordValid) {
+                throw new BadRequestException(emailPassworWrong)
+            }
+
+            const access_token = await this.jwtService.sign({
+                email: user.email,
+                fullName: user.fullName,
+                roles: user.rolesName
+            })
+
+            user = await this.prismaService.user.update({
+                where: { email: validate.email },
+                data: {
+                    accessToken: access_token
+                }
+            })
+
+            const expirationTime = 7 * 24 * 60 * 60 * 1000;
+
+            res.cookie('access-token', user.accessToken, {
+                maxAge: expirationTime,
+                httpOnly: true
+            })
+
+            return {
+                success: true,
+                message: authLoginSuccess,
+                data: {
+                    email: user.email,
+                    fullName: user.fullName,
+                    accessToken: user.accessToken,
+                    refreshToken: user.refreshToken
+                }
+            }
+        } catch (error) {
+            return {
+                success: false,
+                message: authLoginFailed,
+                errors: error
+            }
+        }
+    }
+}
