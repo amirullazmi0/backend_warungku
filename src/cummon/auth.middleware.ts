@@ -3,7 +3,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 
 
 @Injectable()
-export class AuthMidlleware implements NestMiddleware {
+export class AuthUserMidlleware implements NestMiddleware {
     constructor(
         private prismaService: PrismaService
     ) { }
