@@ -34,8 +34,9 @@ model user {
 
 model store {
   id           String         @id @unique @db.VarChar(255)
+  email        String         @unique @db.VarChar(255)
   fullName     String         @db.VarChar(255)
-  Bio          String?        @db.Text()
+  bio          String?        @db.Text()
   address      String?        @db.Text()
   logo         String?        @db.VarChar()
   password     String         @db.VarChar(255)

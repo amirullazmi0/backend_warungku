@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { authloginUserRequest } from 'model/auth.model';
 import { Response } from 'express';
 import { userCreateRequest } from 'model/user.model';
+import { storeCreateRequest } from 'model/store.model';
 
 @Controller('/api/auth')
 export class AuthController {
@@ -24,6 +25,13 @@ export class AuthController {
         return this.authService.registerSuper(req);
     }
 
+    @Post('/register/store')
+    async registerStore(
+        @Body() req: storeCreateRequest,
+    ) {
+        return this.authService.registerStore(req);
+    }
+
     @Post('/login')
     async login(
         @Body() req: authloginUserRequest,
@@ -37,12 +45,12 @@ export class AuthController {
         @Body() req: authloginUserRequest,
         @Res({ passthrough: true }) res: Response
     ) {
-        return this.authService.login(req, res)
+        return this.authService.loginStore(req, res)
     }
 
     @Post('/logout/user')
     async logoutUser() {
-        
+
     }
 
     @Post('/logout/store')

@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
-import { authLoginRequestSchema, authLoginUserResponse, authloginUserRequest } from 'model/auth.model';
+import { authLoginRequestSchema, authLoginStoreResponse, authLoginUserResponse, authloginStoreRequest, authloginUserRequest } from 'model/auth.model';
 import { accountNotRegister, authLoginFailed, authLoginSuccess, emailIsUnique, emailPassworWrong, registerFailed, registerSuccess } from 'model/message';
 import { WebResponse } from 'model/web.model';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { userCRUDResponse, userCreateRequest, userCreateSchema } from 'model/user.model';
 import { randomUUID } from 'crypto';
+import { storeCreateRequest, storeCreateSchema, storeCRUDResponse } from 'model/store.model';
 
 @Injectable()
 export class AuthService {
@@ -73,6 +74,64 @@ export class AuthService {
             }
         }
     }
+
+    async loginStore(req: authloginStoreRequest, res: Response): Promise<WebResponse<authLoginStoreResponse>> {
+        try {
+            const validate = authLoginRequestSchema.parse({
+                email: req.email,
+                password: req.password
+            })
+
+            let store = await this.prismaService.store.findFirst({
+                where: { email: validate.email }
+            })
+
+            if (!store) {
+                throw new BadRequestException(accountNotRegister)
+            }
+            const isPasswordValid = await bcrypt.compare(req.password, store.password)
+
+            if (!isPasswordValid) {
+                throw new BadRequestException(emailPassworWrong)
+            }
+
+            const access_token = await this.jwtService.sign({
+                email: store.email,
+                roles: 'user'
+            })
+
+            store = await this.prismaService.store.update({
+                where: { email: validate.email },
+                data: {
+                    accessToken: access_token
+                }
+            })
+
+            const expirationTime = 7 * 24 * 60 * 60 * 1000;
+
+            res.cookie('access-token', store.accessToken, {
+                maxAge: expirationTime,
+                httpOnly: true
+            })
+
+            return {
+                success: true,
+                message: authLoginSuccess,
+                data: {
+                    email: store.email,
+                    fullName: store.fullName,
+                    accessToken: store.accessToken,
+                    refreshToken: store.refreshToken
+                }
+            }
+        } catch (error) {
+            return {
+                success: false,
+                message: authLoginFailed,
+                errors: error
+            }
+        }
+    }
     async register(req: userCreateRequest): Promise<WebResponse<userCRUDResponse>> {
         try {
             let refreshToken = this.jwtService.sign({
@@ -114,6 +173,7 @@ export class AuthService {
                     refreshToken: validate.refreshToken,
                     address: validate.address,
                     rolesName: rolesName,
+                    images: validate.images
                 },
             });
             return {
@@ -176,6 +236,69 @@ export class AuthService {
                     refreshToken: validate.refreshToken,
                     address: validate.address,
                     rolesName: rolesName,
+                    images: validate.images
+                },
+            });
+            return {
+                success: true,
+                message: registerSuccess,
+                data: {
+                    email: create.email,
+                    fullName: create.fullName,
+                    accessToken: create.accessToken,
+                    refreshToken: create.refreshToken
+                },
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: registerFailed,
+                errors: error
+            }
+        }
+    }
+
+    async registerStore(req: storeCreateRequest): Promise<WebResponse<storeCRUDResponse>> {
+        try {
+            let refreshToken = this.jwtService.sign({
+                email: req.email
+            });
+
+
+            const validate = storeCreateSchema.parse({
+                email: req.email,
+                fullName: req.fullName,
+                password: req.password,
+                address: req.address,
+                logo: req.logo,
+                bio: req.bio,
+                refreshToken: refreshToken,
+            });
+
+            let id = randomUUID();
+
+            const unique = await this.prismaService.store.findFirst({
+                where: {
+                    email: validate.email
+                }
+            })
+
+            if (unique) {
+                throw new ConflictException(emailIsUnique)
+            }
+
+            const bcryptPassword = await bcrypt.hash(validate.password, 10)
+
+            const create = await this.prismaService.store.create({
+                data: {
+                    id: id,
+                    email: validate.email,
+                    fullName: validate.fullName,
+                    password: bcryptPassword,
+                    refreshToken: validate.refreshToken,
+                    address: validate.address,
+                    bio: validate.bio,
+                    logo: validate.logo
                 },
             });
             return {
