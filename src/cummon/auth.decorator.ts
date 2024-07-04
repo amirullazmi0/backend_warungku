@@ -1,13 +1,33 @@
 import { createParamDecorator, ExecutionContext, HttpException, HttpStatus, Next } from "@nestjs/common";
+import { user } from "@prisma/client";
 import { storeUnauthorized, unAuthorized, userUnauthorized } from "model/message";
 
 export const AuthUser = createParamDecorator(
     (data: unknown, context: ExecutionContext) => {
         const request = context.switchToHttp().getRequest()
 
-        const user = request.user
+        const user: user = request.user
 
         if (user) {
+            console.log();
+            console.log(`user authorized ${user.email}`);
+            return user
+        } else {
+            throw new HttpException(userUnauthorized, HttpStatus.UNAUTHORIZED)
+        }
+    }
+)
+
+export const AuthSuper = createParamDecorator(
+    (data: unknown, context: ExecutionContext) => {
+
+        const request = context.switchToHttp().getRequest()
+
+        const user: user = request.user
+
+        if (user && user.rolesName === 'super') {
+            console.log();
+            console.log(`super user authorized ${user.email}`);
             return user
         } else {
             throw new HttpException(userUnauthorized, HttpStatus.UNAUTHORIZED)

@@ -4,7 +4,7 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
-import { AuthMidlleware, AuthUserSuperMidlleware } from './auth.middleware';
+import { AuthMidlleware } from './auth.middleware';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Global()
@@ -31,6 +31,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 })
 export class CummonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMidlleware, AuthUserSuperMidlleware).forRoutes('/api/*');
+    consumer.apply(AuthMidlleware).forRoutes('/api/*');
   }
 }
