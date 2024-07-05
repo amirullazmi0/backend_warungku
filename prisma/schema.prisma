@@ -28,6 +28,7 @@ model user {
   rolesName    String         @db.VarChar(255)
   transactions transactions[]
   wishList     wishList[]
+  shoppingCart shoppingCart[]
 
   @@map("users")
 }
@@ -93,6 +94,8 @@ model shoppingCart {
   itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
   itemStoreId String    @db.VarChar(255)
   total       Int       @db.Integer
+  user        user      @relation(fields: [userId], references: [id])
+  userId      String    @db.VarChar(255)
   reatedAt    DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
