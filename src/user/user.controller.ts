@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { UserService } from './user.service';
-import { AuthSuper, AuthUser } from 'src/cummon/auth.decorator';
+import { Auth, AuthSuper, AuthUser } from 'src/cummon/auth.decorator';
 import { user } from '@prisma/client';
+import { userUpdateRequest } from 'model/user.model';
 
 @Controller('/api/user')
 export class UserController {
@@ -13,5 +14,28 @@ export class UserController {
     @Query('id') id?: string,
   ) {
     return this.userService.getData(id);
+
+  }
+  @Get('/profile')
+  async getProfile(
+    @Auth() user: user,
+  ) {
+    return this.userService.getProfile(user);
+  }
+
+  @Put('/update/:id')
+  async updateById(
+    @AuthSuper() user: user,
+    @Param('id') id: string,
+    @Body() req: userUpdateRequest
+  ) {
+    return this.userService.updateUserbyId(id, req);
+  }
+  @Put('/update/profile')
+  async updateUserProfile(
+    @Auth() user: user,
+    @Body() req: userUpdateRequest
+  ) {
+    return this.userService.updateUserProfile(user, req);
   }
 }

@@ -1,9 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotAcceptableException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { user } from '@prisma/client';
 import { randomUUID } from 'crypto';
-import { emailIsUnique, getDataFailed, getDataSuccess, registerFailed, registerSuccess } from 'model/message';
-import { userCRUDResponse, userCreateRequest, userCreateSchema } from 'model/user.model';
+import { dataNotFound, deleteDataFailed, deleteDataSuccess, emailIsUnique, getDataFailed, getDataSuccess, registerFailed, registerSuccess, updateDataFailed, updateDataSuccess } from 'model/message';
+import { userCRUDResponse, userCreateRequest, userCreateSchema, userUpdateRequest } from 'model/user.model';
 import { WebResponse } from 'model/web.model';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
@@ -21,7 +21,7 @@ export class UserService {
 
       user = await this.prismaService.user.findMany({
         include: {
-          roles: true,
+          // roles: true,
           // transactions: true,
         },
       });
@@ -31,9 +31,8 @@ export class UserService {
             id: id,
           },
           include: {
-            _count: true,
-            roles: true,
-            transactions: true,
+            // roles: true,
+            // transactions: true,
           },
         });
       }
@@ -54,6 +53,125 @@ export class UserService {
       };
     }
   }
+  async getProfile(user: user): Promise<WebResponse<user>> {
+    try {
+      let profile = await this.prismaService.user.findFirst({
+        where: { id: user.id },
+        include: {
+          roles: true,
+          // transactions: true,
+        },
+      });
 
+      return {
+        success: true,
+        message: getDataSuccess,
+        data: profile
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: getDataFailed,
+        errors: error,
+      };
+    }
+  }
 
+  async updateUserbyId(id: string, req: userUpdateRequest): Promise<WebResponse<any>> {
+    let user = await this.prismaService.user.findFirst({
+      where: { id: id }
+    })
+
+    if (!user) {
+      throw new NotFoundException(dataNotFound)
+    }
+
+    const validate = userCreateSchema.parse({
+      email: req.email ? req.email : user.email,
+      fullName: req.fullName ? req.fullName : user.fullName,
+      images: req.images ? req.images : user.images,
+      address: req.address ? req.address : user.address
+    })
+
+    user = await this.prismaService.user.update({
+      where: { id: user.id },
+      data: validate
+    })
+    try {
+      return {
+        success: true,
+        message: updateDataSuccess,
+        data: validate
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: updateDataFailed,
+        errors: error
+      }
+    }
+  }
+
+  async updateUserProfile(user: user, req: userUpdateRequest): Promise<WebResponse<any>> {
+    let profile = await this.prismaService.user.findFirst({
+      where: { id: user.id }
+    })
+
+    if (!profile) {
+      throw new NotFoundException(dataNotFound)
+    }
+
+    const validate = userCreateSchema.parse({
+      email: req.email ? req.email : user.email,
+      fullName: req.fullName ? req.fullName : user.fullName,
+      images: req.images ? req.images : user.images,
+      address: req.address ? req.address : user.address
+    })
+
+    profile = await this.prismaService.user.update({
+      where: { id: user.id },
+      data: validate
+    })
+
+    try {
+      return {
+        success: true,
+        message: updateDataSuccess,
+        data: validate
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: updateDataFailed,
+        errors: error
+      }
+    }
+  }
+
+  async deleteUserById(id: string): Promise<WebResponse<{ message: string }>> {
+    let user = await this.prismaService.user.findFirst({
+      where: { id: id }
+    })
+
+    if (!user) {
+      throw new NotFoundException(dataNotFound)
+    }
+
+    user = await this.prismaService.user.delete({
+      where: { id: id }
+    })
+
+    try {
+      return {
+        success: true,
+        message: deleteDataSuccess
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: deleteDataFailed,
+        errors: error
+      }
+    }
+  }
 }

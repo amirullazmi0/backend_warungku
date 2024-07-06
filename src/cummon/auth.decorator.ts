@@ -2,7 +2,7 @@ import { createParamDecorator, ExecutionContext, HttpException, HttpStatus, Next
 import { user } from "@prisma/client";
 import { storeUnauthorized, unAuthorized, userUnauthorized } from "model/message";
 
-export const AuthUser = createParamDecorator(
+export const Auth = createParamDecorator(
     (data: unknown, context: ExecutionContext) => {
         const request = context.switchToHttp().getRequest()
 
@@ -13,7 +13,23 @@ export const AuthUser = createParamDecorator(
             console.log(`user authorized ${user.email}`);
             return user
         } else {
-            throw new HttpException(userUnauthorized, HttpStatus.UNAUTHORIZED)
+            throw new HttpException(unAuthorized, HttpStatus.UNAUTHORIZED)
+        }
+    }
+)
+
+export const AuthUser = createParamDecorator(
+    (data: unknown, context: ExecutionContext) => {
+        const request = context.switchToHttp().getRequest()
+
+        const user: user = request.user
+
+        if (user && user.rolesName === 'user') {
+            console.log();
+            console.log(`user authorized ${user.email}`);
+            return user
+        } else {
+            throw new HttpException(unAuthorized, HttpStatus.UNAUTHORIZED)
         }
     }
 )
@@ -30,7 +46,7 @@ export const AuthSuper = createParamDecorator(
             console.log(`super user authorized ${user.email}`);
             return user
         } else {
-            throw new HttpException(userUnauthorized, HttpStatus.UNAUTHORIZED)
+            throw new HttpException(unAuthorized, HttpStatus.UNAUTHORIZED)
         }
     }
 )

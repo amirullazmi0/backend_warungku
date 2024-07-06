@@ -1,6 +1,6 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { authLoginRequestSchema, authLoginStoreResponse, authLoginUserResponse, authloginStoreRequest, authloginUserRequest } from 'model/auth.model';
-import { accountNotRegister, authLoginFailed, authLoginSuccess, emailIsUnique, emailPassworWrong, registerFailed, registerSuccess } from 'model/message';
+import { accountNotRegister, authLoginFailed, authLoginSuccess, emailIsUnique, emailPassworWrong, registerFailed, registerSuccess, unAuthorized } from 'model/message';
 import { WebResponse } from 'model/web.model';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
@@ -9,6 +9,7 @@ import { Response } from 'express';
 import { userCRUDResponse, userCreateRequest, userCreateSchema } from 'model/user.model';
 import { randomUUID } from 'crypto';
 import { storeCreateRequest, storeCreateSchema, storeCRUDResponse } from 'model/store.model';
+import { user } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,37 @@ export class AuthService {
         private prismaService: PrismaService,
         private jwtService: JwtService
     ) { }
+
+    async checkAuth(user: user): Promise<WebResponse<any>> {
+        try {
+            const auth = await this.prismaService.user.findFirst({
+                where: { id: user.id }
+            })
+
+            if (!auth) {
+                throw new UnauthorizedException(unAuthorized)
+            }
+
+            return {
+                success: true,
+                message: `Hi ${auth.fullName}`,
+                data: {
+                    user: {
+                        id: auth.id,
+                        email: auth.email,
+                        fullName: auth.fullName,
+                    }
+                }
+            }
+
+        } catch (error) {
+            return {
+                success: false,
+                message: unAuthorized,
+                errors: error
+            }
+        }
+    }
 
     async login(req: authloginUserRequest, res: Response): Promise<WebResponse<authLoginUserResponse>> {
         try {

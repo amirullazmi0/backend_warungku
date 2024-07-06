@@ -1,5 +1,9 @@
 export const getDataSuccess = 'get data successfully';
 export const getDataFailed = 'get data failed';
+export const updateDataSuccess = 'get data successfully';
+export const updateDataFailed = 'get data failed';
+export const deleteDataSuccess = 'delete data successfully';
+export const deleteDataFailed = 'delete data failed';
 export const registerSuccess = 'register successfully';
 export const registerFailed = 'register failed';
 export const emailIsUnique = 'email already in use';
@@ -10,3 +14,4 @@ export const emailPassworWrong = 'email or password is wrong'
 export const unAuthorized = 'Unauthorized'
 export const userUnauthorized = 'user Unauthorized'
 export const storeUnauthorized = 'store Unauthorized'
+export const dataNotFound = 'data not found'

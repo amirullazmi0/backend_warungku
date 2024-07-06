@@ -1,15 +1,25 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { authloginUserRequest } from 'model/auth.model';
 import { Response } from 'express';
 import { userCreateRequest } from 'model/user.model';
 import { storeCreateRequest } from 'model/store.model';
+import { Auth } from 'src/cummon/auth.decorator';
+import { WebResponse } from 'model/web.model';
+import { user } from '@prisma/client';
 
 @Controller('/api/auth')
 export class AuthController {
     constructor(
         private authService: AuthService
     ) { }
+
+    @Get('/check-auth')
+    async checkAuth(
+        @Auth() user: user
+    ) {
+        return this.authService.checkAuth(user)
+    }
 
     @Post('/register')
     async register(
@@ -46,15 +56,5 @@ export class AuthController {
         @Res({ passthrough: true }) res: Response
     ) {
         return this.authService.loginStore(req, res)
-    }
-
-    @Post('/logout/user')
-    async logoutUser() {
-
-    }
-
-    @Post('/logout/store')
-    async logoutStore() {
-
     }
 }
