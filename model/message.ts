@@ -1,7 +1,9 @@
 export const getDataSuccess = 'get data successfully';
 export const getDataFailed = 'get data failed';
-export const updateDataSuccess = 'get data successfully';
-export const updateDataFailed = 'get data failed';
+export const updateDataSuccess = 'update data successfully';
+export const updateDataFailed = 'update data failed';
+export const updatePasswordSuccess = 'update password successfully';
+export const updatePasswordFailed = 'update password failed';
 export const deleteDataSuccess = 'delete data successfully';
 export const deleteDataFailed = 'delete data failed';
 export const registerSuccess = 'register successfully';

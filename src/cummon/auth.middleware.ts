@@ -14,20 +14,20 @@ export class AuthUserMidlleware implements NestMiddleware {
 
         if (type === 'Bearer' && token) {
             let user = await this.prismaService.user.findFirst({
-                where: {
-                    accessToken: token
-                }
+                where: { accessToken: token }
             })
 
             if (!user) {
                 user = await this.prismaService.user.findFirst({
-                    where: {
-                        refreshToken: token
-                    }
+                    where: { refreshToken: token }
                 })
             }
 
             if (user) {
+                user = await this.prismaService.user.update({
+                    where: { id: user.id },
+                    data: { lastActive: new Date() }
+                })
                 req.user = user
             }
         }

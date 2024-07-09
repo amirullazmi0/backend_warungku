@@ -22,6 +22,7 @@ model user {
   address      String?        @db.Text()
   accessToken  String?        @db.VarChar(255)
   refreshToken String?        @db.VarChar(255)
+  lastActive   DateTime?      @db.Timestamp()
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   roles        roles          @relation(fields: [rolesName], references: [name])
@@ -43,6 +44,7 @@ model store {
   password     String         @db.VarChar(255)
   accessToken  String?        @db.VarChar(255)
   refreshToken String?        @db.VarChar(255)
+  lastActive   DateTime?      @db.Timestamp()
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   itemStore    itemStore?     @relation(fields: [itemStoreId], references: [id])

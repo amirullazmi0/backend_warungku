@@ -205,7 +205,8 @@ export class AuthService {
                     refreshToken: validate.refreshToken,
                     address: validate.address,
                     rolesName: rolesName,
-                    images: validate.images
+                    images: validate.images,
+                    
                 },
             });
             return {

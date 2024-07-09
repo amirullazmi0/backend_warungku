@@ -23,7 +23,7 @@ export class UserController {
     return this.userService.getProfile(user);
   }
 
-  @Put('/update/:id')
+  @Put('/:id/update')
   async updateById(
     @AuthSuper() user: user,
     @Param('id') id: string,
