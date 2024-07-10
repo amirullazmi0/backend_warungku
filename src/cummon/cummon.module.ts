@@ -6,6 +6,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { AuthUserMidlleware } from './auth.middleware';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Global()
 @Module({
@@ -16,6 +18,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../../', 'public'),
+      exclude: ['/api/(.*)'],
     }),
     JwtModule.register({
       global: true,
