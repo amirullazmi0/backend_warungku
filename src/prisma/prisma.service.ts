@@ -33,16 +33,25 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, stri
     }
     onModuleInit() {
         this.$on('info', (e) => {
+            console.log();
             this.logger.info(e)
+            console.log();
         })
         this.$on('warn', (e) => {
+            console.log();
             this.logger.warn(e)
+            console.log();
         })
         this.$on('error', (e) => {
+            console.log();
             this.logger.error(e)
+            console.log();
+
         })
         this.$on('query', (e) => {
+            console.log();
             this.logger.info(e)
+            console.log();
         })
     }
 }
