@@ -3,9 +3,9 @@ import { z } from 'zod';
 export class userCreateRequest {
   email: string;
   fullName: string;
-  images?: string;
   password: string;
   address?: string;
+  images?: Express.Multer.File;
   //   rolesName?: string;
   //   accessToken?: string;
   //   refreshToken: string;
@@ -14,8 +14,8 @@ export class userCreateRequest {
 export class userUpdateRequest {
   email?: string;
   fullName?: string;
-  images?: string;
   address?: string;
+  images?: Express.Multer.File;
   //   rolesName?: string;
   //   accessToken?: string;
   //   refreshToken: string;

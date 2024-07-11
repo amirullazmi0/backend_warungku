@@ -1,2 +1,2 @@
-export const pathImage = './public/cdn/images'
-export const pathDocument = './public/cdn/document'
+export const pathImage = 'cdn/images'
+export const pathDocument = 'cdn/document'

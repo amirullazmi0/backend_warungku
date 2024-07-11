@@ -112,7 +112,10 @@ export class UserService {
     }
   }
 
-  async updateUserProfile(user: user, req: userUpdateRequest): Promise<WebResponse<any>> {
+  async updateUserProfile(user: user, req: userUpdateRequest, images?: Express.Multer.File): Promise<WebResponse<any>> {
+    console.log(images);
+
+    return
     let profile = await this.prismaService.user.findFirst({
       where: { id: user.id }
     })
@@ -121,10 +124,11 @@ export class UserService {
       throw new NotFoundException(dataNotFound)
     }
 
+
     const validate = userCreateSchema.parse({
       email: req.email ? req.email : user.email,
       fullName: req.fullName ? req.fullName : user.fullName,
-      images: req.images ? req.images : user.images,
+      images: images ? images : user.images,
       address: req.address ? req.address : user.address
     })
 

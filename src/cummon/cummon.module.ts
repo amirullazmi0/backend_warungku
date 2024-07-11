@@ -8,6 +8,7 @@ import { AuthUserMidlleware } from './auth.middleware';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { AttachmentService } from 'src/attachment/attachment.service';
 
 @Global()
 @Module({
@@ -32,8 +33,8 @@ import { join } from 'path';
     }),
     HttpModule,
   ],
-  providers: [PrismaService],
-  exports: [PrismaService],
+  providers: [PrismaService, AttachmentService],
+  exports: [PrismaService, AttachmentService],
 })
 export class CummonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
