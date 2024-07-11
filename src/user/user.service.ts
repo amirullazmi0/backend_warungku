@@ -2,17 +2,19 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { JwtService } from '@nestjs/jwt';
 import { user } from '@prisma/client';
 import { randomUUID } from 'crypto';
-import { dataNotFound, deleteDataFailed, deleteDataSuccess, emailIsUnique, getDataFailed, getDataSuccess, registerFailed, registerSuccess, updateDataFailed, updateDataSuccess } from 'model/message';
-import { userCRUDResponse, userCreateRequest, userCreateSchema, userUpdateRequest } from 'model/user.model';
+import { dataNotFound, deleteDataFailed, deleteDataSuccess, emailIsUnique, fileMustImage, getDataFailed, getDataSuccess, registerFailed, registerSuccess, updateDataFailed, updateDataSuccess } from 'model/message';
+import { userCRUDResponse, userCreateRequest, userCreateSchema, userUpdateRequest, userUpdateSchema } from 'model/user.model';
 import { WebResponse } from 'model/web.model';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
+import { AttachmentService } from 'src/attachment/attachment.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
+    private attachmentService: AttachmentService
   ) { }
 
   async getData(id?: string): Promise<WebResponse<{ record: number | undefined; user: user[] | user; }>> {
@@ -89,7 +91,6 @@ export class UserService {
     const validate = userCreateSchema.parse({
       email: req.email ? req.email : user.email,
       fullName: req.fullName ? req.fullName : user.fullName,
-      images: req.images ? req.images : user.images,
       address: req.address ? req.address : user.address
     })
 
@@ -113,31 +114,36 @@ export class UserService {
   }
 
   async updateUserProfile(user: user, req: userUpdateRequest, images?: Express.Multer.File): Promise<WebResponse<any>> {
-    console.log(images);
-
-    return
-    let profile = await this.prismaService.user.findFirst({
-      where: { id: user.id }
-    })
-
-    if (!profile) {
-      throw new NotFoundException(dataNotFound)
-    }
-
-
-    const validate = userCreateSchema.parse({
-      email: req.email ? req.email : user.email,
-      fullName: req.fullName ? req.fullName : user.fullName,
-      images: images ? images : user.images,
-      address: req.address ? req.address : user.address
-    })
-
-    profile = await this.prismaService.user.update({
-      where: { id: user.id },
-      data: validate
-    })
-
     try {
+      let profile = await this.prismaService.user.findFirst({
+        where: { id: user.id }
+      })
+
+      if (!profile) {
+        throw new NotFoundException(dataNotFound)
+      }
+
+      let dataImages: string = undefined
+      if (images) {
+        if (images.mimetype.startsWith('image/')) {
+          const saveImages = await this.attachmentService.createImage(images)
+          dataImages = saveImages.path.toString()
+        } else {
+          throw new BadRequestException(fileMustImage)
+        }
+      }
+
+      const validate = userUpdateSchema.parse({
+        email: req.email ? req.email : user.email,
+        fullName: req.fullName ? req.fullName : user.fullName,
+        address: req.address ? req.address : user.address,
+        images: dataImages ? dataImages : user.images
+      })
+
+      profile = await this.prismaService.user.update({
+        where: { id: user.id },
+        data: validate
+      })
       return {
         success: true,
         message: updateDataSuccess,

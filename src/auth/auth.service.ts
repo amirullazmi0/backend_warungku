@@ -177,7 +177,7 @@ export class AuthService {
                 fullName: req.fullName,
                 password: req.password,
                 address: req.address,
-                images: req.images,
+                // images: req.images,
                 rolesName: rolesName,
                 refreshToken: refreshToken,
             });
@@ -205,8 +205,8 @@ export class AuthService {
                     refreshToken: validate.refreshToken,
                     address: validate.address,
                     rolesName: rolesName,
-                    images: validate.images,
-                    
+                    // images: validate.images,
+
                 },
             });
             return {
@@ -241,7 +241,7 @@ export class AuthService {
                 fullName: req.fullName,
                 password: req.password,
                 address: req.address,
-                images: req.images,
+                // images: req.images,
                 rolesName: rolesName,
                 refreshToken: refreshToken,
             });
@@ -269,7 +269,7 @@ export class AuthService {
                     refreshToken: validate.refreshToken,
                     address: validate.address,
                     rolesName: rolesName,
-                    images: validate.images
+                    // images: validate.images
                 },
             });
             return {

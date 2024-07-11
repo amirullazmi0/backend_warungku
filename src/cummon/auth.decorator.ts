@@ -10,7 +10,7 @@ export const Auth = createParamDecorator(
 
         if (user) {
             console.log();
-            console.log(`user authorized ${user.email}`);
+            console.log(`user authorized ${user.email} [${user.rolesName}]`);
             return user
         } else {
             throw new HttpException(unAuthorized, HttpStatus.UNAUTHORIZED)

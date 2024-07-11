@@ -19,3 +19,5 @@ export const storeUnauthorized = 'store Unauthorized'
 export const dataNotFound = 'data not found'
 export const createFileSuccess = 'create file successfully'
 export const createFileFailed = 'create file failed'
+export const fileMustImage = 'file must be image'
+
