@@ -6,7 +6,7 @@ import { PrismaClient } from '@prisma/client';
 export class TokenCleanupService {
     private readonly prisma = new PrismaClient();
 
-    @Cron('* * * * *') // Jalankan setiap satu jam
+    @Cron('0 * * * *') // Jalankan setiap satu jam
     async handleCron() {
         const oneDayAgo = new Date();
         oneDayAgo.setDate(oneDayAgo.getDate() - 1);

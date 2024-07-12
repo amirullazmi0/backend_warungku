@@ -65,20 +65,39 @@ model roles {
 }
 
 model itemStore {
-  id           String         @id @unique @db.VarChar(255)
-  name         String         @db.VarChar(255)
-  total        Int            @db.Integer
-  price        Int            @db.Integer
-  desc         String?        @db.Text
-  images       Json[]         @db.Json
-  stores       store[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  transactions transactions[]
-  wishList     wishList[]
-  shoppingCart shoppingCart[]
+  id                String              @id @unique @db.VarChar(255)
+  name              String              @db.VarChar(255)
+  total             Int                 @db.Integer
+  price             Int                 @db.Integer
+  desc              String?             @db.Text
+  images            Json[]              @db.Json
+  stores            store[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  transactions      transactions[]
+  wishList          wishList[]
+  shoppingCart      shoppingCart[]
+  ItemStoreCategory ItemStoreCategory[]
 
   @@map("itemStores")
+}
+
+model category {
+  id                String              @id @db.VarChar(255)
+  name              String              @unique @db.VarChar(255)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  ItemStoreCategory ItemStoreCategory[]
+}
+
+model ItemStoreCategory {
+  itemStoreId String    @db.VarChar(255)
+  categoryId  String    @db.VarChar(255)
+  category    category  @relation(fields: [categoryId], references: [id])
+  itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
+
+  @@id([itemStoreId, categoryId])
+  @@map("itemStoreCategory")
 }
 
 model wishList {
