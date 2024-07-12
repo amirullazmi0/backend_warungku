@@ -9,6 +9,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AttachmentService } from 'src/attachment/attachment.service';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TokenCleanupService } from 'src/auth/token-cleanup.service';
 
 @Global()
 @Module({
@@ -31,10 +33,11 @@ import { AttachmentService } from 'src/attachment/attachment.service';
       //     expiresIn: '1h',
       //   },
     }),
+    ScheduleModule.forRoot(),
     HttpModule,
   ],
-  providers: [PrismaService, AttachmentService],
-  exports: [PrismaService, AttachmentService],
+  providers: [PrismaService, AttachmentService, TokenCleanupService],
+  exports: [PrismaService, AttachmentService, TokenCleanupService],
 })
 export class CummonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
