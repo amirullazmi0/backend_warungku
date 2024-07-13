@@ -10,7 +10,7 @@ export class authLoginUserResponse {
     fullName: string
     accessToken: string
     refreshToken: string
-    roles?: string
+    rolesName: string
 }
 
 export class authloginStoreRequest {

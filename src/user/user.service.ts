@@ -60,7 +60,7 @@ export class UserService {
       let profile = await this.prismaService.user.findFirst({
         where: { id: user.id },
         include: {
-          roles: true,
+          // roles: true,
           // transactions: true,
         },
       });

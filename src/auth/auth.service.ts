@@ -36,6 +36,7 @@ export class AuthService {
                         id: auth.id,
                         email: auth.email,
                         fullName: auth.fullName,
+                        rolesName: auth.rolesName
                     }
                 }
             }
@@ -95,7 +96,8 @@ export class AuthService {
                     email: user.email,
                     fullName: user.fullName,
                     accessToken: user.accessToken,
-                    refreshToken: user.refreshToken
+                    refreshToken: user.refreshToken,
+                    rolesName: user.rolesName
                 }
             }
         } catch (error) {
