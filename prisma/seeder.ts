@@ -20,20 +20,37 @@ async function main() {
         ]
     })
 
+    const address = await prisma.address.createMany({
+        data: [
+            {
+                id: 'address-admin-id-super'
+            }
+        ]
+    })
+
     const userSuper = await prisma.user.createMany({
         data: [
             {
-                id: randomUUID(),
+                id: 'user-admin-id-super',
                 email: 'amirullazmi0@gmail.com',
                 fullName: 'amirullazmi0@gmail.com',
                 password: await bcrypt.hash('amirullazmi0@gmail.com', 10),
                 rolesName: 'super',
                 refreshToken: jwt.sign({ email: 'amirullazmi0@gmail.com' }),
-                address: 'Jakarta, Indonesia'
+                addressId: 'address-admin-id-super'
             }
         ]
     })
-    return { roles, userSuper }
+
+    const userAddress = await prisma.userAddress.createMany({
+        data: [
+            {
+                userId: 'user-admin-id-super',
+                addressId: 'address-admin-id-super'
+            }
+        ]
+    })
+    return { roles, address, userSuper, userAddress }
 }
 
 main()

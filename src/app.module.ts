@@ -8,10 +8,12 @@ import { ItemStoreModule } from './item-store/item-store.module';
 import { RoleModule } from './role/role.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { AddressService } from './address/address.service';
+import { AddressModule } from './address/address.module';
 
 @Module({
-  imports: [UserModule, AuthModule, PrismaModule, CummonModule, StoreModule, ItemStoreModule, RoleModule, WishlistModule, TransactionModule],
+  imports: [UserModule, AuthModule, PrismaModule, CummonModule, StoreModule, ItemStoreModule, RoleModule, WishlistModule, TransactionModule, AddressModule],
   controllers: [],
-  providers: [],
+  providers: [AddressService],
 })
 export class AppModule { }

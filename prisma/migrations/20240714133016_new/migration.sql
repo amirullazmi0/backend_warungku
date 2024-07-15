@@ -5,15 +5,33 @@ CREATE TABLE "users" (
     "fullName" VARCHAR(200) NOT NULL,
     "images" VARCHAR(255),
     "password" VARCHAR(255) NOT NULL,
-    "address" TEXT,
     "accessToken" VARCHAR(255),
     "refreshToken" VARCHAR(255),
-    "lastActive" TIMESTAMP NOT NULL,
+    "lastActive" TIMESTAMP,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "rolesName" VARCHAR(255) NOT NULL,
+    "addressId" VARCHAR(255),
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "address" (
+    "id" VARCHAR(255) NOT NULL,
+    "active" BOOLEAN NOT NULL,
+    "jalan" VARCHAR(255) NOT NULL,
+    "rt" VARCHAR(255) NOT NULL,
+    "rw" VARCHAR(255) NOT NULL,
+    "kodepos" VARCHAR(255) NOT NULL,
+    "kelurahan" VARCHAR(255) NOT NULL,
+    "kecamatan" VARCHAR(255) NOT NULL,
+    "kota" VARCHAR(255) NOT NULL,
+    "provinsi" VARCHAR(255) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "address_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -27,7 +45,7 @@ CREATE TABLE "stores" (
     "password" VARCHAR(255) NOT NULL,
     "accessToken" VARCHAR(255),
     "refreshToken" VARCHAR(255),
-    "lastActive" TIMESTAMP NOT NULL,
+    "lastActive" TIMESTAMP,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "itemStoreId" VARCHAR(255),
@@ -57,6 +75,24 @@ CREATE TABLE "itemStores" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "itemStores_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "category" (
+    "id" VARCHAR(255) NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "category_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "itemStoreCategory" (
+    "itemStoreId" VARCHAR(255) NOT NULL,
+    "categoryId" VARCHAR(255) NOT NULL,
+
+    CONSTRAINT "itemStoreCategory_pkey" PRIMARY KEY ("itemStoreId","categoryId")
 );
 
 -- CreateTable
@@ -102,6 +138,9 @@ CREATE UNIQUE INDEX "users_id_key" ON "users"("id");
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "address_id_key" ON "address"("id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "stores_id_key" ON "stores"("id");
 
 -- CreateIndex
@@ -112,6 +151,9 @@ CREATE UNIQUE INDEX "roles_name_key" ON "roles"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "itemStores_id_key" ON "itemStores"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "category_name_key" ON "category"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "wishList_id_key" ON "wishList"("id");
@@ -126,7 +168,16 @@ CREATE UNIQUE INDEX "transactions_id_key" ON "transactions"("id");
 ALTER TABLE "users" ADD CONSTRAINT "users_rolesName_fkey" FOREIGN KEY ("rolesName") REFERENCES "roles"("name") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "users" ADD CONSTRAINT "users_addressId_fkey" FOREIGN KEY ("addressId") REFERENCES "address"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "stores" ADD CONSTRAINT "stores_itemStoreId_fkey" FOREIGN KEY ("itemStoreId") REFERENCES "itemStores"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "itemStoreCategory" ADD CONSTRAINT "itemStoreCategory_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "itemStoreCategory" ADD CONSTRAINT "itemStoreCategory_itemStoreId_fkey" FOREIGN KEY ("itemStoreId") REFERENCES "itemStores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "wishList" ADD CONSTRAINT "wishList_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

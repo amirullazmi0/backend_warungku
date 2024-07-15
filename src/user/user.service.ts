@@ -23,6 +23,7 @@ export class UserService {
 
       user = await this.prismaService.user.findMany({
         include: {
+          address: true
           // roles: true,
           // transactions: true,
         },
@@ -33,6 +34,7 @@ export class UserService {
             id: id,
           },
           include: {
+            address: true
             // roles: true,
             // transactions: true,
           },
@@ -60,6 +62,7 @@ export class UserService {
       let profile = await this.prismaService.user.findFirst({
         where: { id: user.id },
         include: {
+          address: true
           // roles: true,
           // transactions: true,
         },
@@ -91,7 +94,7 @@ export class UserService {
     const validate = userCreateSchema.parse({
       email: req.email ? req.email : user.email,
       fullName: req.fullName ? req.fullName : user.fullName,
-      address: req.address ? req.address : user.address
+      addressId: req.addressId ? req.addressId : user.addressId
     })
 
     user = await this.prismaService.user.update({
@@ -136,7 +139,7 @@ export class UserService {
       const validate = userUpdateSchema.parse({
         email: req.email ? req.email : user.email,
         fullName: req.fullName ? req.fullName : user.fullName,
-        address: req.address ? req.address : user.address,
+        addressId: req.addressId ? req.addressId : user.addressId,
         images: dataImages ? dataImages : user.images
       })
 

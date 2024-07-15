@@ -178,13 +178,13 @@ export class AuthService {
                 email: req.email,
                 fullName: req.fullName,
                 password: req.password,
-                address: req.address,
+                addressId: req.addressId,
                 // images: req.images,
                 rolesName: rolesName,
                 refreshToken: refreshToken,
             });
 
-            let id = randomUUID();
+            let userId = randomUUID();
 
             const unique = await this.prismaService.user.findFirst({
                 where: {
@@ -198,19 +198,32 @@ export class AuthService {
 
             const bcryptPassword = await bcrypt.hash(validate.password, 10)
 
+            const addressId = randomUUID()
+            const createAddress = await this.prismaService.address.create({
+                data: {
+                    id: addressId
+                }
+            })
+
             const create = await this.prismaService.user.create({
                 data: {
-                    id: id,
+                    id: userId,
                     email: validate.email,
                     fullName: validate.fullName,
                     password: bcryptPassword,
                     refreshToken: validate.refreshToken,
-                    address: validate.address,
                     rolesName: rolesName,
+                    addressId: createAddress.id
                     // images: validate.images,
-
                 },
             });
+
+            await this.prismaService.userAddress.create({
+                data: {
+                    userId: userId,
+                    addressId: addressId
+                }
+            })
             return {
                 success: true,
                 message: registerSuccess,
@@ -242,13 +255,13 @@ export class AuthService {
                 email: req.email,
                 fullName: req.fullName,
                 password: req.password,
-                address: req.address,
+                addressId: req.addressId,
                 // images: req.images,
                 rolesName: rolesName,
                 refreshToken: refreshToken,
             });
 
-            let id = randomUUID();
+            let userId = randomUUID();
 
             const unique = await this.prismaService.user.findFirst({
                 where: {
@@ -262,18 +275,32 @@ export class AuthService {
 
             const bcryptPassword = await bcrypt.hash(validate.password, 10)
 
+            const addressId = randomUUID()
+            const createAddress = await this.prismaService.address.create({
+                data: {
+                    id: addressId
+                }
+            })
+
             const create = await this.prismaService.user.create({
                 data: {
-                    id: id,
+                    id: userId,
                     email: validate.email,
                     fullName: validate.fullName,
                     password: bcryptPassword,
                     refreshToken: validate.refreshToken,
-                    address: validate.address,
                     rolesName: rolesName,
-                    // images: validate.images
+                    addressId: createAddress.id
+                    // images: validate.images,
                 },
             });
+
+            await this.prismaService.userAddress.create({
+                data: {
+                    userId: userId,
+                    addressId: addressId
+                }
+            })
             return {
                 success: true,
                 message: registerSuccess,

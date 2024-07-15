@@ -19,7 +19,6 @@ model user {
   fullName     String         @db.VarChar(200)
   images       String?        @db.VarChar(255)
   password     String         @db.VarChar(255)
-  address      String?        @db.Text()
   accessToken  String?        @db.VarChar(255)
   refreshToken String?        @db.VarChar(255)
   lastActive   DateTime?      @db.Timestamp()
@@ -27,11 +26,41 @@ model user {
   updatedAt    DateTime       @updatedAt
   roles        roles          @relation(fields: [rolesName], references: [name])
   rolesName    String         @db.VarChar(255)
+  address      address?       @relation(fields: [addressId], references: [id])
+  addressId    String?        @db.VarChar(255)
   transactions transactions[]
   wishList     wishList[]
   shoppingCart shoppingCart[]
+  userAddress  userAddress[]
 
   @@map("users")
+}
+
+model address {
+  id          String        @id @unique @db.VarChar(255)
+  active      Boolean?      @db.Boolean
+  jalan       String?       @db.VarChar(255)
+  rt          String?       @db.VarChar(255)
+  rw          String?       @db.VarChar(255)
+  kodepos     String?       @db.VarChar(255)
+  kelurahan   String?       @db.VarChar(255)
+  kecamatan   String?       @db.VarChar(255)
+  kota        String?       @db.VarChar(255)
+  provinsi    String?       @db.VarChar(255)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        user[]
+  userAddress userAddress[]
+}
+
+model userAddress {
+  addressId String  @db.VarChar(255)
+  userId    String  @db.VarChar(255)
+  address   address @relation(fields: [addressId], references: [id])
+  user      user    @relation(fields: [userId], references: [id])
+
+  @@id([addressId, userId])
+  @@map("userAddress")
 }
 
 model store {
