@@ -5,7 +5,7 @@ import { user } from '@prisma/client';
 import { userUpdateRequest } from 'model/user.model';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AddressService } from 'src/address/address.service';
-import { addressCreateRequest } from 'model/address.model';
+import { addressCreateRequest, addressUpdateRequest } from 'model/address.model';
 import { apiUser } from 'src/cummon/url';
 
 @Controller()
@@ -64,7 +64,7 @@ export class UserController {
   @Put(`${apiUser}/update/profile/address`)
   async updateProfileAddress(
     @Auth() user: user,
-    @Body() req: addressCreateRequest
+    @Body() req: addressUpdateRequest
   ) {
     return this.addressService.updateAddressProfile(user, req)
   }

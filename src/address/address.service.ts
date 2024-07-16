@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { user } from '@prisma/client';
 import { randomUUID } from 'crypto';
-import { addressCreateRequest, addressCreateSchema, addressCRUDResponse, addressUpdateSchema } from 'model/address.model';
+import { addressCreateRequest, addressCreateSchema, addressCRUDResponse, addressUpdateRequest, addressUpdateSchema } from 'model/address.model';
 import { dataNotFound, getDataFailed, getDataSuccess, updateDataFailed, updateDataSuccess } from 'model/message';
 import { userCreateRequest } from 'model/user.model';
 import { WebResponse } from 'model/web.model';
@@ -38,69 +38,35 @@ export class AddressService {
         }
     }
 
-    async updateAddressProfile(user: user, req: addressCreateRequest): Promise<WebResponse<any>> {
+    async updateAddressProfile(user: user, req: addressUpdateRequest): Promise<WebResponse<any>> {
         try {
             if (!user) {
                 throw new NotFoundException(dataNotFound)
             }
 
-            if (user.addressId) {
-                const validate = addressUpdateSchema.parse({
-                    active: req.active,
-                    jalan: req.jalan,
-                    rt: req.rt,
-                    rw: req.rw,
-                    kodepos: req.kodepos,
-                    kelurahan: req.kelurahan,
-                    kecamatan: req.kecamatan,
-                    kota: req.kota,
-                    provinsi: req.provinsi,
-                })
+            const validate = addressUpdateSchema.parse({
+                active: req.active,
+                jalan: req.jalan,
+                rt: req.rt,
+                rw: req.rw,
+                kodepos: req.kodepos,
+                kelurahan: req.kelurahan,
+                kecamatan: req.kecamatan,
+                kota: req.kota,
+                provinsi: req.provinsi,
+            })            
 
-                const update = this.prismaService.address.update({
-                    where: { id: user.addressId },
-                    data: validate
-                })
-                return {
-                    success: true,
-                    message: updateDataSuccess,
-                    data: update
-                }
-            } else {
-                const id = randomUUID()
+            const update = await this.prismaService.address.update({
+                where: { id: user.addressId },
+                data: validate
+            })
 
-                const validate = addressCreateSchema.parse({
-                    id: id,
-                    active: req.active,
-                    jalan: req.jalan,
-                    rt: req.rt,
-                    rw: req.rw,
-                    kodepos: req.kodepos,
-                    kelurahan: req.kelurahan,
-                    kecamatan: req.kecamatan,
-                    kota: req.kota,
-                    provinsi: req.provinsi,
-                })
-
-                const create = this.prismaService.address.create({
-                    data: {
-                        id: validate.id,
-                        active: validate.active,
-                        jalan: validate.jalan,
-                        rt: validate.rt,
-                        rw: validate.rw,
-                        kodepos: validate.kodepos,
-                        kelurahan: validate.kelurahan,
-                        kecamatan: validate.kecamatan,
-                        kota: validate.kota,
-                        provinsi: validate.provinsi
-                    }
-                })
-                return {
-                    success: true,
-                    message: updateDataSuccess,
-                    data: create
-                }
+            console.log(update);
+            
+            return {
+                success: true,
+                message: updateDataSuccess,
+                data: update
             }
 
         } catch (error) {
