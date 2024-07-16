@@ -65,12 +65,16 @@ export class StoreService {
                 fullName: req.fullName ? req.fullName : store.email,
                 logo: req.logo ? req.logo : store.logo,
                 bio: req.bio ? req.bio : store.bio,
-                address: req.address ? req.address : store.address
+                addressId: req.addressId ? req.addressId : store.addressId
             })
 
             store = await this.prismaService.store.update({
                 where: { id: id },
-                data: validate
+                data: {
+                    email: validate.email,
+                    fullName: validate.fullName,
+                    
+                }
             })
 
             return {

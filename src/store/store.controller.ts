@@ -3,36 +3,19 @@ import { StoreService } from './store.service';
 import { AuthSuper } from 'src/cummon/auth.decorator';
 import { user } from '@prisma/client';
 import { storeUpdatePasswordRequest } from 'model/store.model';
+import { apiUser } from 'src/cummon/url';
 
-@Controller('/api/store')
+@Controller()
 export class StoreController {
     constructor(
         private storeService: StoreService
     ) { }
 
-    @Get()
+    @Get(`${apiUser}/get-store`)
     async getAll(
         @AuthSuper() user: user,
         @Query('id') id?: string,
     ) {
         return this.storeService.getData(id);
-    }
-
-    @Put('/:id/update-password')
-    async updatePasswordById(
-        @AuthSuper() user: user,
-        @Query('id') id: string,
-        @Body() req: storeUpdatePasswordRequest
-    ) {
-        return this.storeService.updatePasswordById(id, req);
-    }
-
-    @Delete('/:id/delete')
-    async deleteStoreById(
-        @AuthSuper() user: user,
-        @Query('id') id: string,
-        @Body() req: storeUpdatePasswordRequest
-    ) {
-        return this.storeService.updatePasswordById(id, req);
     }
 }

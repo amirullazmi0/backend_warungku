@@ -7,42 +7,43 @@ import { storeCreateRequest } from 'model/store.model';
 import { Auth } from 'src/cummon/auth.decorator';
 import { WebResponse } from 'model/web.model';
 import { user } from '@prisma/client';
+import { apiStore, apiUser } from 'src/cummon/url';
 
-@Controller('/api/auth')
+@Controller()
 export class AuthController {
     constructor(
         private authService: AuthService
     ) { }
 
-    @Get('/check-auth')
+    @Get(`${apiUser}/auth/check-auth`)
     async checkAuth(
         @Auth() user: user
     ) {
         return this.authService.checkAuth(user)
     }
 
-    @Post('/register')
+    @Post(`${apiUser}/auth/register`)
     async register(
         @Body() req: userCreateRequest,
     ) {
         return this.authService.register(req);
     }
 
-    @Post('/register/super-admin-register')
+    @Post(`${apiUser}/auth/register/super-admin-register`)
     async registerSuper(
         @Body() req: userCreateRequest,
     ) {
         return this.authService.registerSuper(req);
     }
 
-    @Post('/register/store')
+    @Post(`${apiStore}/auth/register`)
     async registerStore(
         @Body() req: storeCreateRequest,
     ) {
         return this.authService.registerStore(req);
     }
 
-    @Post('/login')
+    @Post(`${apiUser}/auth/login`)
     async login(
         @Body() req: authloginUserRequest,
         @Res({ passthrough: true }) res: Response
@@ -50,7 +51,7 @@ export class AuthController {
         return this.authService.login(req, res)
     }
 
-    @Post('/login/store')
+    @Post(`${apiStore}/auth/login`)
     async loginStore(
         @Body() req: authloginUserRequest,
         @Res({ passthrough: true }) res: Response

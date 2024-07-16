@@ -6,30 +6,31 @@ import { userUpdateRequest } from 'model/user.model';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AddressService } from 'src/address/address.service';
 import { addressCreateRequest } from 'model/address.model';
+import { apiUser } from 'src/cummon/url';
 
-@Controller('/api/user')
+@Controller()
 export class UserController {
   constructor(
     private userService: UserService,
     private addressService: AddressService
   ) { }
 
-  @Get()
+  @Get(`${apiUser}/list-user`)
   async getAll(
     @AuthSuper() user: user,
     @Query('id') id?: string,
   ) {
     return this.userService.getData(id);
   }
-  
-  @Get('/profile')
+
+  @Get(`${apiUser}/profile`)
   async getProfile(
     @Auth() user: user,
   ) {
     return this.userService.getProfile(user);
   }
 
-  @Put('/:id/update')
+  @Put(`${apiUser}/:id/update`)
   async updateById(
     @AuthSuper() user: user,
     @Param('id') id: string,
@@ -37,7 +38,7 @@ export class UserController {
   ) {
     return this.userService.updateUserbyId(id, req);
   }
-  @Put('/update/profile')
+  @Put(`${apiUser}/update/profile`)
   @UseInterceptors(FileInterceptor('images'))
   async updateUserProfile(
     @Auth() user: user,
@@ -53,14 +54,14 @@ export class UserController {
     return this.userService.updateUserProfile(user, req, images);
   }
 
-  @Get('/profile/address')
+  @Get(`${apiUser}/profile/address`)
   async getProfileAddress(
     @Auth() user: user,
   ) {
     return this.addressService.getAddress(user);
   }
 
-  @Put('/update/profile/address')
+  @Put(`${apiUser}/update/profile/address`)
   async updateProfileAddress(
     @Auth() user: user,
     @Body() req: addressCreateRequest
