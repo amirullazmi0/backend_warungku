@@ -5,7 +5,6 @@ import { Response } from 'express';
 import { userCreateRequest } from 'model/user.model';
 import { storeCreateRequest } from 'model/store.model';
 import { Auth } from 'src/cummon/auth.decorator';
-import { WebResponse } from 'model/web.model';
 import { user } from '@prisma/client';
 import { apiStore, apiUser } from 'src/cummon/url';
 
@@ -29,7 +28,7 @@ export class AuthController {
         return this.authService.register(req);
     }
 
-    @Post(`${apiUser}/auth/register/super-admin-register`)
+    @Post(`${apiUser}/auth/register/super`)
     async registerSuper(
         @Body() req: userCreateRequest,
     ) {
