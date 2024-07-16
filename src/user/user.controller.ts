@@ -20,8 +20,8 @@ export class UserController {
     @Query('id') id?: string,
   ) {
     return this.userService.getData(id);
-
   }
+  
   @Get('/profile')
   async getProfile(
     @Auth() user: user,
