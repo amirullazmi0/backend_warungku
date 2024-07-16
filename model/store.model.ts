@@ -6,7 +6,7 @@ export class storeCreateRequest {
     logo?: string;
     password: string;
     bio?: string;
-    address?: string;
+    addressId?: string;
     //   accessToken?: string;
     //   refreshToken: string;
 }
@@ -16,7 +16,7 @@ export class storeUpdateRequest {
     fullName: string;
     logo?: string;
     bio?: string;
-    address?: string;
+    addressId?: string;
     //   accessToken?: string;
     //   refreshToken: string;
 }
@@ -39,19 +39,20 @@ export const storeCreateSchema = z.object({
         .max(200, 'full name is too long'),
     logo: z.string().optional(),
     password: z.string().min(1, 'password is required'),
-    bio: z.string().optional(),
-    address: z.string().optional(),
-    accessToken: z.string().optional(),
+    bio: z.string().nullable().optional(),
+    addressId: z.string().nullable().optional(),
+    accessToken: z.string().nullable().optional(),
     refreshToken: z.string().min(1, 'refresh token is required'),
 });
 
 export const storeUpdateSchema = z.object({
-    email: z.string().min(1, 'email is required').email('Invalid email address'),
+    email: z.string().min(1, 'email is required').email('Invalid email address').nullable().optional(),
     fullName: z
         .string()
         .min(1, 'full name is required')
-        .max(200, 'full name is too long'),
-    logo: z.string().optional(),
-    bio: z.string().optional(),
-    address: z.string().optional(),
+        .max(200, 'full name is too long')
+        .nullable().optional(),
+    logo: z.string().nullable().optional(),
+    bio: z.string().nullable().optional(),
+    address: z.string().nullable().optional(),
 });

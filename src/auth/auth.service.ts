@@ -331,13 +331,12 @@ export class AuthService {
                 email: req.email,
                 fullName: req.fullName,
                 password: req.password,
-                address: req.address,
                 logo: req.logo,
                 bio: req.bio,
                 refreshToken: refreshToken,
             });
 
-            let id = randomUUID();
+            let storeId = randomUUID();
 
             const unique = await this.prismaService.store.findFirst({
                 where: {
@@ -349,20 +348,34 @@ export class AuthService {
                 throw new ConflictException(emailIsUnique)
             }
 
+            const addressId = randomUUID()
+            const createAddress = await this.prismaService.address.create({
+                data: {
+                    id: addressId
+                }
+            })
+
             const bcryptPassword = await bcrypt.hash(validate.password, 10)
 
             const create = await this.prismaService.store.create({
                 data: {
-                    id: id,
+                    id: storeId,
                     email: validate.email,
                     fullName: validate.fullName,
                     password: bcryptPassword,
                     refreshToken: validate.refreshToken,
-                    address: validate.address,
+                    addressId: createAddress.id,
                     bio: validate.bio,
                     logo: validate.logo
                 },
             });
+
+            await this.prismaService.storeAddress.create({
+                data: {
+                    storeId: storeId,
+                    addressId: addressId
+                }
+            })
             return {
                 success: true,
                 message: registerSuccess,
