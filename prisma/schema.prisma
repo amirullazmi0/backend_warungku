@@ -37,20 +37,24 @@ model user {
 }
 
 model address {
-  id          String        @id @unique @db.VarChar(255)
-  active      Boolean?      @db.Boolean
-  jalan       String?       @db.VarChar(255)
-  rt          String?       @db.VarChar(255)
-  rw          String?       @db.VarChar(255)
-  kodepos     String?       @db.VarChar(255)
-  kelurahan   String?       @db.VarChar(255)
-  kecamatan   String?       @db.VarChar(255)
-  kota        String?       @db.VarChar(255)
-  provinsi    String?       @db.VarChar(255)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  user        user[]
-  userAddress userAddress[]
+  id           String         @id @unique @db.VarChar(255)
+  active       Boolean?       @db.Boolean
+  jalan        String?        @db.VarChar(255)
+  rt           String?        @db.VarChar(255)
+  rw           String?        @db.VarChar(255)
+  kodepos      String?        @db.VarChar(255)
+  kelurahan    String?        @db.VarChar(255)
+  kecamatan    String?        @db.VarChar(255)
+  kota         String?        @db.VarChar(255)
+  provinsi     String?        @db.VarChar(255)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  user         user[]
+  userAddress  userAddress[]
+  store        store[]
+  storeAddress storeAddress[]
+
+  @@map("address")
 }
 
 model userAddress {
@@ -68,7 +72,8 @@ model store {
   email        String         @unique @db.VarChar(255)
   fullName     String         @db.VarChar(255)
   bio          String?        @db.Text()
-  address      String?        @db.Text()
+  address      address?       @relation(fields: [addressId], references: [id])
+  addressId    String?        @db.VarChar(255)
   logo         String?        @db.VarChar()
   password     String         @db.VarChar(255)
   accessToken  String?        @db.VarChar(255)
@@ -76,11 +81,21 @@ model store {
   lastActive   DateTime?      @db.Timestamp()
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  itemStore    itemStore?     @relation(fields: [itemStoreId], references: [id])
-  itemStoreId  String?        @db.VarChar(255)
   transactions transactions[]
+  storeAddress storeAddress[]
+  itemStore    itemStore[]
 
   @@map("stores")
+}
+
+model storeAddress {
+  addressId String  @db.VarChar(255)
+  storeId   String  @db.VarChar(255)
+  address   address @relation(fields: [addressId], references: [id])
+  store     store   @relation(fields: [storeId], references: [id])
+
+  @@id([addressId, storeId])
+  @@map("storeAddress")
 }
 
 model roles {
@@ -99,16 +114,28 @@ model itemStore {
   total             Int                 @db.Integer
   price             Int                 @db.Integer
   desc              String?             @db.Text
-  images            Json[]              @db.Json
-  stores            store[]
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
+  store             store               @relation(fields: [storeId], references: [id])
+  storeId           String              @db.VarChar(255)
   transactions      transactions[]
   wishList          wishList[]
   shoppingCart      shoppingCart[]
   ItemStoreCategory ItemStoreCategory[]
+  itemStoreImage    itemStoreImage[]
 
   @@map("itemStores")
+}
+
+model itemStoreImage {
+  id          String    @id @unique @db.VarChar(255)
+  url         String    @db.VarChar(255)
+  itemStoreId String    @db.VarChar(255)
+  itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("itemStoreImages")
 }
 
 model category {
