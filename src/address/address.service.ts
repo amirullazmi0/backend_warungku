@@ -60,8 +60,6 @@ export class AddressService {
                 where: { id: user.addressId },
                 data: validate
             })
-
-            console.log(update);
             
             return {
                 success: true,
