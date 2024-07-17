@@ -43,7 +43,6 @@ export class AddressService {
             if (!user) {
                 throw new NotFoundException(dataNotFound)
             }
-
             const validate = addressUpdateSchema.parse({
                 active: req.active,
                 jalan: req.jalan,
@@ -54,13 +53,13 @@ export class AddressService {
                 kecamatan: req.kecamatan,
                 kota: req.kota,
                 provinsi: req.provinsi,
-            })            
+            })
 
             const update = await this.prismaService.address.update({
                 where: { id: user.addressId },
                 data: validate
             })
-            
+
             return {
                 success: true,
                 message: updateDataSuccess,
