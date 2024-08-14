@@ -1,8 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { user } from '@prisma/client';
-import { randomUUID } from 'crypto';
-import { dataNotFound, deleteDataFailed, deleteDataSuccess, emailIsUnique, fileMustImage, getDataFailed, getDataSuccess, registerFailed, registerSuccess, updateDataFailed, updateDataSuccess } from 'model/message';
+import { dataNotFound, deleteDataFailed, deleteDataSuccess, emailIsUnique, fileMustImage, getDataFailed, getDataSuccess, updateDataFailed, updateDataSuccess } from 'model/message';
 import { userCRUDResponse, userCreateRequest, userCreateSchema, userUpdateRequest, userUpdateSchema } from 'model/user.model';
 import { WebResponse } from 'model/web.model';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -23,7 +22,11 @@ export class UserService {
 
       user = await this.prismaService.user.findMany({
         include: {
-          address: true
+          // userAddress: {
+          //   include: {
+          //     address: true
+          //   }
+          // },
           // roles: true,
           // transactions: true,
         },
@@ -34,7 +37,11 @@ export class UserService {
             id: id,
           },
           include: {
-            address: true
+            // userAddress: {
+            //   include: {
+            //     address: true
+            //   }
+            // },
             // roles: true,
             // transactions: true,
           },
@@ -183,6 +190,39 @@ export class UserService {
       return {
         success: false,
         message: deleteDataFailed,
+        errors: error
+      }
+    }
+  }
+
+  async updateImagesProfile(user: user, images?: Express.Multer.File): Promise<WebResponse<any>> {
+    try {
+      let dataImages: string = undefined
+
+      if (images) {
+        if (images.mimetype.startsWith('image/')) {
+          const saveImages = await this.attachmentService.createImage(images)
+          dataImages = saveImages.path.toString()
+        } else {
+          throw new BadRequestException(fileMustImage)
+        }
+      }
+
+      await this.prismaService.user.update({
+        where: { id: user.id },
+        data: {
+          images: dataImages
+        }
+      })
+
+      return {
+        success: true,
+        message: updateDataSuccess,
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: updateDataFailed,
         errors: error
       }
     }

@@ -9,21 +9,10 @@ const jwt = new JwtService({
 });
 async function main() {
 
-    const roles = await prisma.roles.createMany({
-        data: [
-            {
-                name: 'super'
-            },
-            {
-                name: 'user'
-            },
-        ]
-    })
-
     const address = await prisma.address.createMany({
         data: [
             {
-                id: 'address-admin-id-super'
+                id: '4c8540e6-87a8-42a3-a413-58a94397b2a0'
             }
         ]
     })
@@ -31,13 +20,13 @@ async function main() {
     const userSuper = await prisma.user.createMany({
         data: [
             {
-                id: 'user-admin-id-super',
+                id: '57f2928c-b02b-49b6-892c-1b5640c0957c',
                 email: 'amirullazmi0@gmail.com',
                 fullName: 'amirullazmi0@gmail.com',
                 password: await bcrypt.hash('amirullazmi0@gmail.com', 10),
                 rolesName: 'super',
                 refreshToken: jwt.sign({ email: 'amirullazmi0@gmail.com' }),
-                addressId: 'address-admin-id-super'
+                addressId: '4c8540e6-87a8-42a3-a413-58a94397b2a0'
             }
         ]
     })
@@ -45,12 +34,12 @@ async function main() {
     const userAddress = await prisma.userAddress.createMany({
         data: [
             {
-                userId: 'user-admin-id-super',
-                addressId: 'address-admin-id-super'
+                userId: '57f2928c-b02b-49b6-892c-1b5640c0957c',
+                addressId: '4c8540e6-87a8-42a3-a413-58a94397b2a0'
             }
         ]
     })
-    return { roles, address, userSuper, userAddress }
+    return { address, userSuper, userAddress }
 }
 
 main()

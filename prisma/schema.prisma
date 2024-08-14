@@ -14,7 +14,7 @@ datasource db {
 }
 
 model user {
-  id           String         @id @unique @db.VarChar(255)
+  id           String         @id @unique @default(uuid()) @db.Uuid
   email        String         @unique @db.VarChar(255)
   fullName     String         @db.VarChar(200)
   images       String?        @db.VarChar(255)
@@ -24,174 +24,67 @@ model user {
   lastActive   DateTime?      @db.Timestamp()
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  roles        roles          @relation(fields: [rolesName], references: [name])
-  rolesName    String         @db.VarChar(255)
+  rolesName    rolesUser      @default(user)
   address      address?       @relation(fields: [addressId], references: [id])
-  addressId    String?        @db.VarChar(255)
-  transactions transactions[]
+  addressId    String?        @db.Uuid
   wishList     wishList[]
   shoppingCart shoppingCart[]
   userAddress  userAddress[]
 
-  @@map("users")
+  @@map("customer_user")
 }
 
 model address {
-  id           String         @id @unique @db.VarChar(255)
-  active       Boolean?       @db.Boolean
-  jalan        String?        @db.VarChar(255)
-  rt           String?        @db.VarChar(255)
-  rw           String?        @db.VarChar(255)
-  kodepos      String?        @db.VarChar(255)
-  kelurahan    String?        @db.VarChar(255)
-  kecamatan    String?        @db.VarChar(255)
-  kota         String?        @db.VarChar(255)
-  provinsi     String?        @db.VarChar(255)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  user         user[]
-  userAddress  userAddress[]
-  store        store[]
-  storeAddress storeAddress[]
+  id          String        @id @unique @default(uuid()) @db.Uuid
+  active      Boolean?      @db.Boolean
+  jalan       String?       @db.VarChar(255)
+  rt          String?       @db.VarChar(255)
+  rw          String?       @db.VarChar(255)
+  kodepos     String?       @db.VarChar(255)
+  kelurahan   String?       @db.VarChar(255)
+  kecamatan   String?       @db.VarChar(255)
+  kota        String?       @db.VarChar(255)
+  provinsi    String?       @db.VarChar(255)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        user[]
+  userAddress userAddress[]
 
-  @@map("address")
+  @@map("customer_address")
 }
 
 model userAddress {
-  addressId String  @db.VarChar(255)
-  userId    String  @db.VarChar(255)
+  addressId String  @db.Uuid
+  userId    String  @db.Uuid
   address   address @relation(fields: [addressId], references: [id])
   user      user    @relation(fields: [userId], references: [id])
 
   @@id([addressId, userId])
-  @@map("userAddress")
-}
-
-model store {
-  id           String         @id @unique @db.VarChar(255)
-  email        String         @unique @db.VarChar(255)
-  fullName     String         @db.VarChar(255)
-  bio          String?        @db.Text()
-  address      address?       @relation(fields: [addressId], references: [id])
-  addressId    String?        @db.VarChar(255)
-  logo         String?        @db.VarChar()
-  password     String         @db.VarChar(255)
-  accessToken  String?        @db.VarChar(255)
-  refreshToken String?        @db.VarChar(255)
-  lastActive   DateTime?      @db.Timestamp()
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  transactions transactions[]
-  storeAddress storeAddress[]
-  itemStore    itemStore[]
-
-  @@map("stores")
-}
-
-model storeAddress {
-  addressId String  @db.VarChar(255)
-  storeId   String  @db.VarChar(255)
-  address   address @relation(fields: [addressId], references: [id])
-  store     store   @relation(fields: [storeId], references: [id])
-
-  @@id([addressId, storeId])
-  @@map("storeAddress")
-}
-
-model roles {
-  name      String   @id @unique @db.VarChar(255)
-  desc      String?  @db.Text()
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      user[]
-
-  @@map("roles")
-}
-
-model itemStore {
-  id                String              @id @unique @db.VarChar(255)
-  name              String              @db.VarChar(255)
-  total             Int                 @db.Integer
-  price             Int                 @db.Integer
-  desc              String?             @db.Text
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  store             store               @relation(fields: [storeId], references: [id])
-  storeId           String              @db.VarChar(255)
-  transactions      transactions[]
-  wishList          wishList[]
-  shoppingCart      shoppingCart[]
-  ItemStoreCategory ItemStoreCategory[]
-  itemStoreImage    itemStoreImage[]
-
-  @@map("itemStores")
-}
-
-model itemStoreImage {
-  id          String    @id @unique @db.VarChar(255)
-  url         String    @db.VarChar(255)
-  itemStoreId String    @db.VarChar(255)
-  itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@map("itemStoreImages")
-}
-
-model category {
-  id                String              @id @db.VarChar(255)
-  name              String              @unique @db.VarChar(255)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  ItemStoreCategory ItemStoreCategory[]
-
-  @@map("category")
-}
-
-model ItemStoreCategory {
-  itemStoreId String    @db.VarChar(255)
-  categoryId  String    @db.VarChar(255)
-  category    category  @relation(fields: [categoryId], references: [id])
-  itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
-
-  @@id([itemStoreId, categoryId])
-  @@map("itemStoreCategory")
+  @@map("user_customer_address")
 }
 
 model wishList {
-  itemStoreId String    @db.VarChar(255)
-  userId      String    @db.VarChar(255)
-  user        user      @relation(fields: [userId], references: [id])
-  itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
+  itemStoreId String @db.Uuid
+  userId      String @db.Uuid
+  user        user   @relation(fields: [userId], references: [id])
 
   @@id([itemStoreId, userId])
-  @@map("wishList")
+  @@map("wishlist")
 }
 
 model shoppingCart {
-  id          String    @id @unique @db.VarChar(255)
-  itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
-  itemStoreId String    @db.VarChar(255)
-  total       Int       @db.Integer
-  user        user      @relation(fields: [userId], references: [id])
-  userId      String    @db.VarChar(255)
-  reatedAt    DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id          String   @id @unique @default(uuid()) @db.Uuid
+  itemStoreId String   @db.Uuid
+  qty         Int      @db.Integer
+  user        user     @relation(fields: [userId], references: [id])
+  userId      String   @db.Uuid
+  reatedAt    DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@map("shoppingCart")
+  @@map("shopping_cart_customer")
 }
 
-model transactions {
-  id          String    @id @unique @db.VarChar(255)
-  total       Int       @db.Integer
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  itemStore   itemStore @relation(fields: [itemStoreId], references: [id])
-  itemStoreId String    @db.VarChar(255)
-  user        user      @relation(fields: [userId], references: [id])
-  userId      String    @db.VarChar(255)
-  store       store     @relation(fields: [storesId], references: [id])
-  storesId    String    @db.VarChar(255)
-
-  @@map("transactions")
+enum rolesUser {
+  user
+  super
 }
