@@ -41,6 +41,6 @@ import { TokenCleanupService } from 'src/auth/token-cleanup.service';
 })
 export class CummonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthUserMidlleware).forRoutes('/api/user/*');
+    consumer.apply(AuthUserMidlleware).forRoutes('/api/*');
   }
 }
