@@ -9,8 +9,16 @@ import { AddressService } from './address/address.service';
 import { AddressModule } from './address/address.module';
 
 @Module({
-  imports: [UserModule, AuthModule, PrismaModule, CummonModule, WishlistModule, TransactionModule, AddressModule],
+  imports: [
+    UserModule,
+    AuthModule,
+    PrismaModule,
+    CummonModule,
+    WishlistModule,
+    TransactionModule,
+    AddressModule,
+  ],
   controllers: [],
   providers: [AddressService],
 })
-export class AppModule { }
+export class AppModule {}
