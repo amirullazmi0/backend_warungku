@@ -1,12 +1,12 @@
 import { Body, Controller, Get, HttpStatus, Param, ParseFilePipeBuilder, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Auth, AuthSuper, AuthUser } from 'src/cummon/auth.decorator';
 import { user } from '@prisma/client';
-import { userUpdateRequest } from 'DTO/user.model';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AddressService } from 'src/address/address.service';
-import { addressCreateRequest, addressUpdateRequest } from 'DTO/address.model';
 import { apiUser } from 'src/cummon/url';
+import { userUpdateRequest } from 'DTO/user.dto';
+import { Auth } from 'src/cummon/auth.decorator';
+import { addressUpdateRequest } from 'DTO/address.dto';
 
 @Controller()
 export class UserController {
@@ -17,7 +17,7 @@ export class UserController {
 
   @Get(`${apiUser}/list-user`)
   async getAll(
-    @AuthSuper() user: user,
+    @Auth() user: user,
     @Query('id') id?: string,
   ) {
     return this.userService.getData(id);
@@ -32,7 +32,7 @@ export class UserController {
 
   @Put(`${apiUser}/:id/update`)
   async updateById(
-    @AuthSuper() user: user,
+    @Auth() user: user,
     @Param('id') id: string,
     @Body() req: userUpdateRequest
   ) {

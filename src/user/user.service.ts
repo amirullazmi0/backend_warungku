@@ -2,11 +2,11 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { JwtService } from '@nestjs/jwt';
 import { user } from '@prisma/client';
 import { dataNotFound, deleteDataFailed, deleteDataSuccess, emailIsUnique, fileMustImage, getDataFailed, getDataSuccess, updateDataFailed, updateDataSuccess } from 'DTO/message';
-import { userCRUDResponse, userCreateRequest, userCreateSchema, userUpdateRequest, userUpdateSchema } from 'DTO/user.model';
 import { WebResponse } from 'DTO/globals.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
 import { AttachmentService } from 'src/attachment/attachment.service';
+import { userCreateSchema, userUpdateRequest, userUpdateSchema } from 'DTO/user.dto';
 
 @Injectable()
 export class UserService {
@@ -106,7 +106,7 @@ export class UserService {
 
     user = await this.prismaService.user.update({
       where: { id: user.id },
-      data: validate
+      data: validate as Partial<userUpdateRequest>
     })
     try {
       return {

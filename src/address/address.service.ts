@@ -1,11 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { user } from '@prisma/client';
-import { randomUUID } from 'crypto';
-import { addressCreateRequest, addressCreateSchema, addressCRUDResponse, addressUpdateRequest, addressUpdateSchema } from 'DTO/address.model';
 import { dataNotFound, getDataFailed, getDataSuccess, updateDataFailed, updateDataSuccess } from 'DTO/message';
-import { userCreateRequest } from 'DTO/user.model';
 import { WebResponse } from 'DTO/globals.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { addressUpdateRequest, addressUpdateSchema } from 'DTO/address.dto';
 
 @Injectable()
 export class AddressService {
