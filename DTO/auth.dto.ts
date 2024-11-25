@@ -1,26 +1,19 @@
 import { z } from "zod"
 
-export class authloginUserRequest {
+export class AuthLoginRequestDTO {
     email: string
     password: string
 }
 
-export class authLoginUserResponse {
+export class AuthRegisterRequestDTO {
     email: string
     fullName: string
-    accessToken: string
-    refreshToken: string
-    rolesName: string
-}
-
-export class authloginStoreRequest {
-    email: string
     password: string
 }
 
-export class authLoginStoreResponse {
-    email: string
+export class AuthLoginResponseDTO{
     fullName: string
+    email: string
     accessToken: string
     refreshToken: string
 }

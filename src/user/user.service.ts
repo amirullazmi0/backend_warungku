@@ -1,9 +1,9 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { user } from '@prisma/client';
-import { dataNotFound, deleteDataFailed, deleteDataSuccess, emailIsUnique, fileMustImage, getDataFailed, getDataSuccess, updateDataFailed, updateDataSuccess } from 'model/message';
-import { userCRUDResponse, userCreateRequest, userCreateSchema, userUpdateRequest, userUpdateSchema } from 'model/user.model';
-import { WebResponse } from 'model/web.model';
+import { dataNotFound, deleteDataFailed, deleteDataSuccess, emailIsUnique, fileMustImage, getDataFailed, getDataSuccess, updateDataFailed, updateDataSuccess } from 'DTO/message';
+import { userCRUDResponse, userCreateRequest, userCreateSchema, userUpdateRequest, userUpdateSchema } from 'DTO/user.model';
+import { WebResponse } from 'DTO/globals.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
 import { AttachmentService } from 'src/attachment/attachment.service';

@@ -1,14 +1,9 @@
 import { z } from 'zod';
 
-export class userCreateRequest {
+export class userCreateRequestDTO {
   email: string;
   fullName: string;
   password: string;
-  addressId?: string;
-  // images?: string;
-  //   rolesName?: string;
-  //   accessToken?: string;
-  //   refreshToken: string;
 }
 
 export class userUpdateRequest {

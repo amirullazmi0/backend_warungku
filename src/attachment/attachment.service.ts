@@ -1,8 +1,8 @@
 import { INestApplication, Injectable } from '@nestjs/common';
-import { pathDocument, pathImage } from 'model/path';
-import { WebResponse } from 'model/web.model';
+import { pathDocument, pathImage } from 'DTO/path';
+import { WebResponse } from 'DTO/globals.dto';
 import * as mime from 'mime-types';
-import { createFileFailed, createFileSuccess } from 'model/message';
+import { createFileFailed, createFileSuccess } from 'DTO/message';
 import { ConfigService } from '@nestjs/config';
 const fs = require('fs');
 

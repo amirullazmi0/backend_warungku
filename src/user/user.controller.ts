@@ -2,10 +2,10 @@ import { Body, Controller, Get, HttpStatus, Param, ParseFilePipeBuilder, Post, P
 import { UserService } from './user.service';
 import { Auth, AuthSuper, AuthUser } from 'src/cummon/auth.decorator';
 import { user } from '@prisma/client';
-import { userUpdateRequest } from 'model/user.model';
+import { userUpdateRequest } from 'DTO/user.model';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AddressService } from 'src/address/address.service';
-import { addressCreateRequest, addressUpdateRequest } from 'model/address.model';
+import { addressCreateRequest, addressUpdateRequest } from 'DTO/address.model';
 import { apiUser } from 'src/cummon/url';
 
 @Controller()

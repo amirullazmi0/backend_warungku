@@ -1,14 +1,13 @@
 import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { authLoginRequestSchema, authLoginStoreResponse, authLoginUserResponse, authloginStoreRequest, authloginUserRequest } from 'model/auth.model';
-import { accountNotRegister, authLoginFailed, authLoginSuccess, emailIsUnique, emailPassworWrong, registerFailed, registerSuccess, unAuthorized } from 'model/message';
-import { WebResponse } from 'model/web.model';
+import { AuthLoginRequestDTO, authLoginRequestSchema, AuthLoginResponseDTO } from 'DTO/auth.dto';
+import { accountNotRegister, authLoginFailed, authLoginSuccess, emailIsUnique, emailPassworWrong, registerFailed, registerSuccess, unAuthorized } from 'DTO/message';
+import { WebResponse } from 'DTO/globals.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
-import { userCRUDResponse, userCreateRequest, userCreateSchema } from 'model/user.model';
+import { userCRUDResponse, userCreateRequestDTO, userCreateSchema } from 'DTO/user.dto';
 import { randomUUID } from 'crypto';
-import { storeCreateRequest, storeCreateSchema, storeCRUDResponse } from 'model/store.model';
 import { user } from '@prisma/client';
 
 @Injectable()
@@ -50,7 +49,7 @@ export class AuthService {
         }
     }
 
-    async login(req: authloginUserRequest, res: Response): Promise<WebResponse<authLoginUserResponse>> {
+    async login(req: AuthLoginRequestDTO, res: Response): Promise<WebResponse<AuthLoginResponseDTO>> {
         try {
             const validate = authLoginRequestSchema.parse({
                 email: req.email,
@@ -97,7 +96,6 @@ export class AuthService {
                     fullName: user.fullName,
                     accessToken: user.accessToken,
                     refreshToken: user.refreshToken,
-                    rolesName: user.rolesName
                 }
             }
         } catch (error) {
@@ -108,80 +106,17 @@ export class AuthService {
             }
         }
     }
-
-    async loginStore(req: authloginStoreRequest, res: Response): Promise<WebResponse<authLoginStoreResponse>> {
-        try {
-            const validate = authLoginRequestSchema.parse({
-                email: req.email,
-                password: req.password
-            })
-
-            let store = await this.prismaService.store.findFirst({
-                where: { email: validate.email }
-            })
-
-            if (!store) {
-                throw new BadRequestException(accountNotRegister)
-            }
-            const isPasswordValid = await bcrypt.compare(req.password, store.password)
-
-            if (!isPasswordValid) {
-                throw new BadRequestException(emailPassworWrong)
-            }
-
-            const access_token = await this.jwtService.sign({
-                email: store.email,
-                roles: 'user'
-            })
-
-            store = await this.prismaService.store.update({
-                where: { email: validate.email },
-                data: {
-                    accessToken: access_token
-                }
-            })
-
-            const expirationTime = 7 * 24 * 60 * 60 * 1000;
-
-            res.cookie('access-token', store.accessToken, {
-                maxAge: expirationTime,
-                httpOnly: true
-            })
-
-            return {
-                success: true,
-                message: authLoginSuccess,
-                data: {
-                    email: store.email,
-                    fullName: store.fullName,
-                    accessToken: store.accessToken,
-                    refreshToken: store.refreshToken
-                }
-            }
-        } catch (error) {
-            return {
-                success: false,
-                message: authLoginFailed,
-                errors: error
-            }
-        }
-    }
-    async register(req: userCreateRequest): Promise<WebResponse<userCRUDResponse>> {
+    async register(body: userCreateRequestDTO): Promise<WebResponse<userCRUDResponse>> {
         try {
             let refreshToken = this.jwtService.sign({
-                email: req.email
+                email: body.email
             });
 
-            let rolesName = 'user';
 
             const validate = userCreateSchema.parse({
-                email: req.email,
-                fullName: req.fullName,
-                password: req.password,
-                addressId: req.addressId,
-                // images: req.images,
-                rolesName: rolesName,
-                refreshToken: refreshToken,
+                email: body.email,
+                fullName: body.fullName,
+                password: body.password,
             });
 
             let userId = randomUUID();
@@ -211,168 +146,14 @@ export class AuthService {
                     email: validate.email,
                     fullName: validate.fullName,
                     password: bcryptPassword,
-                    refreshToken: validate.refreshToken,
-                    rolesName: rolesName,
+                    refreshToken: refreshToken,
                     addressId: createAddress.id
-                    // images: validate.images,
                 },
             });
 
             await this.prismaService.userAddress.create({
                 data: {
                     userId: userId,
-                    addressId: addressId
-                }
-            })
-            return {
-                success: true,
-                message: registerSuccess,
-                data: {
-                    email: create.email,
-                    fullName: create.fullName,
-                    accessToken: create.accessToken,
-                    refreshToken: create.refreshToken
-                },
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: registerFailed,
-                errors: error
-            }
-        }
-    }
-
-    async registerSuper(req: userCreateRequest): Promise<WebResponse<userCRUDResponse>> {
-        try {
-            let refreshToken = this.jwtService.sign({
-                email: req.email
-            });
-
-            let rolesName = 'super';
-
-            const validate = userCreateSchema.parse({
-                email: req.email,
-                fullName: req.fullName,
-                password: req.password,
-                addressId: req.addressId,
-                // images: req.images,
-                rolesName: rolesName,
-                refreshToken: refreshToken,
-            });
-
-            let userId = randomUUID();
-
-            const unique = await this.prismaService.user.findFirst({
-                where: {
-                    email: validate.email
-                }
-            })
-
-            if (unique) {
-                throw new ConflictException(emailIsUnique)
-            }
-
-            const bcryptPassword = await bcrypt.hash(validate.password, 10)
-
-            const addressId = randomUUID()
-            const createAddress = await this.prismaService.address.create({
-                data: {
-                    id: addressId
-                }
-            })
-
-            const create = await this.prismaService.user.create({
-                data: {
-                    id: userId,
-                    email: validate.email,
-                    fullName: validate.fullName,
-                    password: bcryptPassword,
-                    refreshToken: validate.refreshToken,
-                    rolesName: rolesName,
-                    addressId: createAddress.id
-                    // images: validate.images,
-                },
-            });
-
-            await this.prismaService.userAddress.create({
-                data: {
-                    userId: userId,
-                    addressId: addressId
-                }
-            })
-            return {
-                success: true,
-                message: registerSuccess,
-                data: {
-                    email: create.email,
-                    fullName: create.fullName,
-                    accessToken: create.accessToken,
-                    refreshToken: create.refreshToken
-                },
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: registerFailed,
-                errors: error
-            }
-        }
-    }
-
-    async registerStore(req: storeCreateRequest): Promise<WebResponse<storeCRUDResponse>> {
-        try {
-            let refreshToken = this.jwtService.sign({
-                email: req.email
-            });
-
-
-            const validate = storeCreateSchema.parse({
-                email: req.email,
-                fullName: req.fullName,
-                password: req.password,
-                logo: req.logo,
-                bio: req.bio,
-                refreshToken: refreshToken,
-            });
-
-            let storeId = randomUUID();
-
-            const unique = await this.prismaService.store.findFirst({
-                where: {
-                    email: validate.email
-                }
-            })
-
-            if (unique) {
-                throw new ConflictException(emailIsUnique)
-            }
-
-            const addressId = randomUUID()
-            const createAddress = await this.prismaService.address.create({
-                data: {
-                    id: addressId
-                }
-            })
-
-            const bcryptPassword = await bcrypt.hash(validate.password, 10)
-
-            const create = await this.prismaService.store.create({
-                data: {
-                    id: storeId,
-                    email: validate.email,
-                    fullName: validate.fullName,
-                    password: bcryptPassword,
-                    refreshToken: validate.refreshToken,
-                    addressId: createAddress.id,
-                    bio: validate.bio,
-                    logo: validate.logo
-                },
-            });
-
-            await this.prismaService.storeAddress.create({
-                data: {
-                    storeId: storeId,
                     addressId: addressId
                 }
             })
