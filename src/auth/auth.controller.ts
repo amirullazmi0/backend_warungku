@@ -9,29 +9,23 @@ import { apiStore, apiUser } from 'src/cummon/url';
 
 @Controller('auth')
 export class AuthController {
-    constructor(
-        private authService: AuthService
-    ) { }
+  constructor(private authService: AuthService) {}
 
-    @Get(`check-auth`)
-    async checkAuth(
-        @Auth() user: user
-    ) {
-        return this.authService.checkAuth(user)
-    }
+  @Get(`check-auth`)
+  async checkAuth(@Auth() user: user) {
+    return this.authService.checkAuth(user);
+  }
 
-    @Post(`register`)
-    async register(
-        @Body() body: userCreateRequestDTO,
-    ) {
-        return this.authService.register(body);
-    }
+  @Post(`register`)
+  async register(@Body() body: userCreateRequestDTO) {
+    return this.authService.register(body);
+  }
 
-    @Post(`login`)
-    async login(
-        @Body() req: AuthLoginRequestDTO,
-        @Res({ passthrough: true }) res: Response
-    ) {
-        return this.authService.login(req, res)
-    }
+  @Post(`login`)
+  async login(
+    @Body() req: AuthLoginRequestDTO,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.login(req, res);
+  }
 }
