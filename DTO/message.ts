@@ -1,5 +1,7 @@
 export const getDataSuccess = 'get data successfully';
 export const getDataFailed = 'get data failed';
+export const postDataSuccess = 'post data successfully';
+export const postDataFailed = 'post data failed';
 export const updateDataSuccess = 'update data successfully';
 export const updateDataFailed = 'update data failed';
 export const updatePasswordSuccess = 'update password successfully';

@@ -4,7 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { authLoginRequestSchema, authLoginUserResponse } from 'DTO/auth.dto';
+import { authLoginRequestSchema, authloginUserRequest, authLoginUserResponse } from 'DTO/auth.dto';
 import {
   accountNotRegister,
   authLoginFailed,
@@ -68,7 +68,7 @@ export class AuthService {
   }
 
   async login(
-    req: authLoginUserResponse,
+    req: authloginUserRequest,
     res: Response,
   ): Promise<WebResponse<authLoginUserResponse>> {
     try {
