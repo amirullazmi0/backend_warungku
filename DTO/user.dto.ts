@@ -30,7 +30,7 @@ export const userCreateSchema = z.object({
     .max(200, 'full name is too long'),
   password: z.string().min(1, 'password is required'),
   addressId: z.string().nullable().optional(),
-  rolesName: z.string().min(1, 'rolesName is required'),
+  // rolesName: z.string().min(1, 'rolesName is required'),
   accessToken: z.string().nullable().optional(),
   refreshToken: z.string().min(1, 'refresh token is required'),
   images: z.string().nullable().optional(),

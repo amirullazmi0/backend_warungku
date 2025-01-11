@@ -9,7 +9,7 @@ import { authLoginUserResponse } from 'DTO/auth.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Get(`check-auth`)
   async checkAuth(@Auth() user) {
