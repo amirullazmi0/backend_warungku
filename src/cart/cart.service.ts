@@ -1,4 +1,3 @@
-// src/cart/cart.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthService } from 'src/auth/auth.service';
@@ -6,107 +5,73 @@ import { AuthService } from 'src/auth/auth.service';
 @Injectable()
 export class CartService {
   constructor(
-    private prismaService: PrismaService,
-    private authService: AuthService,
+    private readonly prismaService: PrismaService,
+    private readonly authService: AuthService,
   ) {}
 
-  async addToCart(accessToken: string, itemStoreId: string): Promise<any> {
+  async addToCart(accessToken: string, itemStoreId: string, qty: number) {
     const user = await this.authService.validateUserFromToken(accessToken);
-
-    const userByEmail = await this.prismaService.user.findUnique({
+    if (!user) {
+      throw new NotFoundException('User not found or token invalid');
+    }
+    const dbUser = await this.prismaService.user.findUnique({
       where: { email: user.email },
     });
-    if (!userByEmail) {
-      throw new NotFoundException('User not found');
-    }
-    const userId = userByEmail.id;
-
-    let cart = await this.prismaService.cart.findFirst({
-      where: { userId },
-    });
-
-    if (!cart) {
-      cart = await this.prismaService.cart.create({
-        data: {
-          userId,
-        },
-      });
+    if (!dbUser) {
+      throw new NotFoundException('User not found in database');
     }
 
-    const existingCartItem = await this.prismaService.cartItem.findUnique({
+    const existingCartItem = await this.prismaService.shoppingCart.findFirst({
       where: {
-        cartId_itemStoreId: {
-          cartId: cart.id,
-          itemStoreId: itemStoreId,
-        },
+        userId: dbUser.id,
+        itemStoreId,
       },
     });
 
     if (existingCartItem) {
-      return this.prismaService.cartItem.update({
-        where: {
-          cartId_itemStoreId: {
-            cartId: cart.id,
-            itemStoreId: itemStoreId,
-          },
-        },
+      const updatedItem = await this.prismaService.shoppingCart.update({
+        where: { id: existingCartItem.id },
         data: {
-          qty: existingCartItem.qty + 1,
+          qty: existingCartItem.qty + qty,
         },
       });
+      return {
+        success: true,
+        message: 'Item quantity updated in cart',
+        data: updatedItem,
+      };
     }
 
-    const cartItem = await this.prismaService.cartItem.create({
+    const newCartItem = await this.prismaService.shoppingCart.create({
       data: {
-        cartId: cart.id,
-        itemStoreId: itemStoreId,
-        qty: 1,
+        itemStoreId,
+        qty,
+        userId: dbUser.id,
       },
     });
 
     return {
       success: true,
       message: 'Item added to cart',
-      data: cartItem,
+      data: newCartItem,
     };
   }
 
-  async removeFromCart(accessToken: string, itemStoreId: string): Promise<any> {
+  async removeFromCart(accessToken: string, cartItemId: string) {
     const user = await this.authService.validateUserFromToken(accessToken);
-
-    const userByEmail = await this.prismaService.user.findUnique({
-      where: { email: user.email },
-    });
-    if (!userByEmail) {
-      throw new NotFoundException('User not found');
-    }
-    const userId = userByEmail.id;
-
-    const cart = await this.prismaService.cart.findFirst({
-      where: { userId },
-    });
-
-    if (!cart) {
-      throw new NotFoundException('Cart not found');
+    if (!user) {
+      throw new NotFoundException('User not found or token invalid');
     }
 
-    const cartItem = await this.prismaService.cartItem.findUnique({
-      where: {
-        cartId_itemStoreId: {
-          cartId: cart.id,
-          itemStoreId: itemStoreId,
-        },
-      },
+    const existingCartItem = await this.prismaService.shoppingCart.findUnique({
+      where: { id: cartItemId },
     });
-
-    if (!cartItem) {
-      throw new NotFoundException('Item not found in cart');
+    if (!existingCartItem) {
+      throw new NotFoundException('Cart item not found');
     }
 
-    await this.prismaService.cartItem.delete({
-      where: {
-        id: cartItem.id,
-      },
+    await this.prismaService.shoppingCart.delete({
+      where: { id: cartItemId },
     });
 
     return {
@@ -115,86 +80,45 @@ export class CartService {
     };
   }
 
-  async getCart(accessToken: string): Promise<any> {
+  async getCartItems(accessToken: string) {
     const user = await this.authService.validateUserFromToken(accessToken);
+    if (!user) {
+      throw new NotFoundException('User not found or token invalid');
+    }
 
-    const userByEmail = await this.prismaService.user.findUnique({
+    const dbUser = await this.prismaService.user.findUnique({
       where: { email: user.email },
     });
-    if (!userByEmail) {
-      throw new NotFoundException('User not found');
+    if (!dbUser) {
+      throw new NotFoundException('User not found in database');
     }
-    const userId = userByEmail.id;
 
-    const cart = await this.prismaService.cart.findFirst({
-      where: { userId },
-      include: {
-        cartItems: {
-          include: {
-            itemStore: {
-              include: {
-                itemStoreImages: true,
-              },
-            },
-          },
-        },
-      },
+    const cartItems = await this.prismaService.shoppingCart.findMany({
+      where: { userId: dbUser.id },
     });
 
-    if (!cart) {
-      return {
-        success: true,
-        message: 'Cart is empty',
-        data: [],
-      };
-    }
-
-    return cart.cartItems;
+    return {
+      success: true,
+      data: cartItems,
+    };
   }
 
-  async updateCartQty(
-    accessToken: string,
-    itemStoreId: string,
-    qty: number,
-  ): Promise<any> {
+  async updateCartQty(accessToken: string, cartItemId: string, qty: number) {
     const user = await this.authService.validateUserFromToken(accessToken);
+    if (!user) {
+      throw new NotFoundException('User not found or token invalid');
+    }
 
-    const userByEmail = await this.prismaService.user.findUnique({
-      where: { email: user.email },
+    const existingCartItem = await this.prismaService.shoppingCart.findUnique({
+      where: { id: cartItemId },
     });
-    if (!userByEmail) {
-      throw new NotFoundException('User not found');
-    }
-    const userId = userByEmail.id;
-
-    const cart = await this.prismaService.cart.findFirst({
-      where: { userId },
-    });
-
-    if (!cart) {
-      throw new NotFoundException('Cart not found');
-    }
-    const cartItem = await this.prismaService.cartItem.findUnique({
-      where: {
-        id: itemStoreId,
-      },
-    });
-
-    if (!cartItem) {
-      throw new NotFoundException('Item not found in cart');
+    if (!existingCartItem) {
+      throw new NotFoundException('Cart item not found');
     }
 
-    if (qty <= 0) {
-      throw new NotFoundException('Quantity must be greater than 0');
-    }
-
-    const updatedCartItem = await this.prismaService.cartItem.update({
-      where: {
-        id: cartItem.id,
-      },
-      data: {
-        qty: qty,
-      },
+    const updatedCartItem = await this.prismaService.shoppingCart.update({
+      where: { id: cartItemId },
+      data: { qty },
     });
 
     return {
