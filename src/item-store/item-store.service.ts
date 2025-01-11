@@ -6,9 +6,9 @@ import { getDataSuccess } from 'DTO/message';
 
 @Injectable()
 export class ItemStoreService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService) { }
 
-  async getDataItemStore(): Promise<WebResponse<itemStoreResponse>> {
+  async getDataItemStore(id?: string): Promise<WebResponse<itemStoreResponse>> {
     try {
       const data: itemStore[] = await this.prismaService.$queryRaw`
                 SELECT 
