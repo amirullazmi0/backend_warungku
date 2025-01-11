@@ -2,13 +2,15 @@ import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { CummonModule } from './cummon/cummon.module';
+import { CummonModule } from './common/cummon.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { AddressService } from './address/address.service';
 import { AddressModule } from './address/address.module';
+
 import { ItemStoreController } from './item-store/item-store.controller';
 import { ItemStoreModule } from './item-store/item-store.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { ItemStoreModule } from './item-store/item-store.module';
     TransactionModule,
     AddressModule,
     ItemStoreModule,
+    CartModule,
+
   ],
   controllers: [],
   providers: [AddressService],

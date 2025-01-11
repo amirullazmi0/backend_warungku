@@ -15,9 +15,9 @@ import { UserService } from './user.service';
 import { user } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AddressService } from 'src/address/address.service';
-import { apiUser } from 'src/cummon/url';
+import { apiUser } from 'src/common/url';
 import { userUpdateRequest } from 'DTO/user.dto';
-import { Auth } from 'src/cummon/auth.decorator';
+import { Auth } from 'src/common/auth.decorator';
 import { addressUpdateRequest } from 'DTO/address.dto';
 
 @Controller()

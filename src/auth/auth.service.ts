@@ -27,6 +27,7 @@ import {
 } from 'DTO/user.dto';
 import { randomUUID } from 'crypto';
 import { user } from '@prisma/client';
+import { JwtPayload } from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
@@ -199,6 +200,15 @@ export class AuthService {
         message: registerFailed,
         errors: error,
       };
+    }
+  }
+
+  async validateUserFromToken(accessToken: string): Promise<any> {
+    try {
+      const payload: JwtPayload = this.jwtService.verify(accessToken);
+      return payload;
+    } catch (e) {
+      throw new Error('Invalid token');
     }
   }
 }
