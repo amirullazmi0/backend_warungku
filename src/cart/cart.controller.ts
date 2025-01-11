@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Delete, Param } from '@nestjs/common';
+import { Body, Controller, Get, Post, Delete, Headers } from '@nestjs/common';
 import { CartService } from './cart.service';
 import {
   AddToCartDto,
@@ -24,8 +24,9 @@ export class CartController {
   }
 
   @Get('get-cart')
-  async getCart(@Param('accessToken') accessToken: string) {
-    return this.cartService.getCartItems(accessToken);
+  async getCart(@Headers('authorization') authHeader: string) {
+    const token = authHeader.split(' ')[1];
+    return this.cartService.getCartItems(token);
   }
 
   @Post('update-qty')
