@@ -5,15 +5,16 @@ import {
   RemoveFromCartDto,
   UpdateCartQtyDto,
 } from './dto/cart.dto';
+import { apiCart } from 'src/common/url';
 
-@Controller('cart')
+@Controller(`${apiCart}`)
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Post('add')
   async addToCart(@Body() addToCartDto: AddToCartDto) {
-    const { accessToken, itemStoreId } = addToCartDto;
-    return this.cartService.addToCart(accessToken, itemStoreId);
+    const { accessToken, itemStoreId, qty } = addToCartDto;
+    return this.cartService.addToCart(accessToken, itemStoreId, qty);
   }
 
   @Delete('remove')
@@ -22,9 +23,9 @@ export class CartController {
     return this.cartService.removeFromCart(accessToken, itemStoreId);
   }
 
-  @Get('user/:accessToken')
+  @Get('get-cart')
   async getCart(@Param('accessToken') accessToken: string) {
-    return this.cartService.getCart(accessToken);
+    return this.cartService.getCartItems(accessToken);
   }
 
   @Post('update-qty')

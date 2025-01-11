@@ -34,7 +34,7 @@ export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   async checkAuth(user: user): Promise<WebResponse<any>> {
     try {
@@ -139,7 +139,7 @@ export class AuthService {
         email: body.email,
         fullName: body.fullName,
         password: body.password,
-        refreshToken: refreshToken
+        refreshToken: refreshToken,
       });
 
       const unique = await this.prismaService.user.findFirst({
@@ -180,7 +180,7 @@ export class AuthService {
           addressId: addressId,
         },
       });
-      
+
       return {
         success: true,
         message: registerSuccess,
@@ -193,7 +193,6 @@ export class AuthService {
       };
     } catch (error) {
       console.log(error);
-
 
       return {
         success: false,

@@ -6,13 +6,11 @@ import { getDataSuccess } from 'DTO/message';
 
 @Injectable()
 export class ItemStoreService {
-    constructor(
-        private prismaService: PrismaService
-    ) { }
+  constructor(private prismaService: PrismaService) {}
 
-    async getDataItemStore(id?: string): Promise<WebResponse<itemStoreResponse>> {
-        try {
-            const data: itemStore[] = await this.prismaService.$queryRaw`
+  async getDataItemStore(): Promise<WebResponse<itemStoreResponse>> {
+    try {
+      const data: itemStore[] = await this.prismaService.$queryRaw`
                 SELECT 
                     item.id, 
                     item.name, 
@@ -36,16 +34,16 @@ export class ItemStoreService {
                 ORDER BY item."createdAt" DESC
                 `;
 
-            return {
-                message: getDataSuccess,
-                success: true,
-                data: {
-                    record: data.length,
-                    item: data
-                }
-            };
-        } catch (error) {
-            return
-        }
+      return {
+        message: getDataSuccess,
+        success: true,
+        data: {
+          record: data.length,
+          item: data,
+        },
+      };
+    } catch (error) {
+      return;
     }
+  }
 }

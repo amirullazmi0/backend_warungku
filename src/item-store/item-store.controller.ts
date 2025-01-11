@@ -1,20 +1,19 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  // , Query
+} from '@nestjs/common';
 import { ItemStoreService } from './item-store.service';
-import { apiUser } from 'src/cummon/url';
-import { Auth } from 'src/cummon/auth.decorator';
-import { user } from '@prisma/client';
+import { apiStore } from 'src/common/url';
+// import { Auth } from 'src/common/auth.decorator';
+// import { user } from '@prisma/client';
 
-@Controller(`${apiUser}/item-store`)
+@Controller(`${apiStore}/item-store`)
 export class ItemStoreController {
-    constructor(
-        private itemStoreService: ItemStoreService
-    ) { }
+  constructor(private itemStoreService: ItemStoreService) {}
 
-    @Get()
-    async getAll(
-        @Auth() user: user,
-        @Query('id') id?: string
-    ) {
-        return this.itemStoreService.getDataItemStore(id)
-    }
+  @Get()
+  async getAll() {
+    return this.itemStoreService.getDataItemStore();
+  }
 }

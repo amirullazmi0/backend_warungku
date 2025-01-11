@@ -1,6 +1,7 @@
 export class AddToCartDto {
   accessToken: string;
   itemStoreId: string;
+  qty: number;
 }
 
 export class RemoveFromCartDto {
