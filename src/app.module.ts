@@ -7,6 +7,9 @@ import { WishlistModule } from './wishlist/wishlist.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { AddressService } from './address/address.service';
 import { AddressModule } from './address/address.module';
+
+import { ItemStoreController } from './item-store/item-store.controller';
+import { ItemStoreModule } from './item-store/item-store.module';
 import { CartModule } from './cart/cart.module';
 
 @Module({
@@ -18,9 +21,11 @@ import { CartModule } from './cart/cart.module';
     WishlistModule,
     TransactionModule,
     AddressModule,
+    ItemStoreModule,
     CartModule,
+
   ],
   controllers: [],
   providers: [AddressService],
 })
-export class AppModule {}
+export class AppModule { }

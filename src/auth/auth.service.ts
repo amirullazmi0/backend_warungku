@@ -34,7 +34,7 @@ export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async checkAuth(user: user): Promise<WebResponse<any>> {
     try {
@@ -139,9 +139,8 @@ export class AuthService {
         email: body.email,
         fullName: body.fullName,
         password: body.password,
+        refreshToken: refreshToken
       });
-
-      const userId = randomUUID();
 
       const unique = await this.prismaService.user.findFirst({
         where: {
@@ -152,6 +151,8 @@ export class AuthService {
       if (unique) {
         throw new ConflictException(emailIsUnique);
       }
+
+      const userId = randomUUID();
 
       const bcryptPassword = await bcrypt.hash(validate.password, 10);
 
@@ -179,6 +180,7 @@ export class AuthService {
           addressId: addressId,
         },
       });
+      
       return {
         success: true,
         message: registerSuccess,
@@ -190,6 +192,9 @@ export class AuthService {
         },
       };
     } catch (error) {
+      console.log(error);
+
+
       return {
         success: false,
         message: registerFailed,
