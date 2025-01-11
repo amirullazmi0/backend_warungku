@@ -4,11 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import {
-  AuthLoginRequestDTO,
-  authLoginRequestSchema,
-  AuthLoginResponseDTO,
-} from 'DTO/auth.dto';
+import { authLoginRequestSchema, authLoginUserResponse } from 'DTO/auth.dto';
 import {
   accountNotRegister,
   authLoginFailed,
@@ -71,9 +67,9 @@ export class AuthService {
   }
 
   async login(
-    req: AuthLoginRequestDTO,
+    req: authLoginUserResponse,
     res: Response,
-  ): Promise<WebResponse<AuthLoginResponseDTO>> {
+  ): Promise<WebResponse<authLoginUserResponse>> {
     try {
       const validate = authLoginRequestSchema.parse({
         email: req.email,
@@ -120,7 +116,7 @@ export class AuthService {
           fullName: user.fullName,
           accessToken: user.accessToken,
           refreshToken: user.refreshToken,
-        },
+        } as authLoginUserResponse,
       };
     } catch (error) {
       return {
@@ -134,7 +130,7 @@ export class AuthService {
     body: userCreateRequestDTO,
   ): Promise<WebResponse<userCRUDResponse>> {
     try {
-      let refreshToken = this.jwtService.sign({
+      const refreshToken = this.jwtService.sign({
         email: body.email,
       });
 
@@ -144,7 +140,7 @@ export class AuthService {
         password: body.password,
       });
 
-      let userId = randomUUID();
+      const userId = randomUUID();
 
       const unique = await this.prismaService.user.findFirst({
         where: {

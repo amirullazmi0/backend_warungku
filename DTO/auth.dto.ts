@@ -5,7 +5,7 @@ export class authloginUserRequest {
   password: string;
 }
 
-export class authLoginUserResponse {
+export class authLoginUserResponse extends authloginUserRequest {
   email: string;
   fullName: string;
   accessToken: string;
