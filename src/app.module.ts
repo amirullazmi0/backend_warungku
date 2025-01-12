@@ -11,6 +11,7 @@ import { ItemStoreController } from './item-store/item-store.controller';
 import { ItemStoreModule } from './item-store/item-store.module';
 import { CartModule } from './cart/cart.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { StoreModule } from './store/store.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
     ItemStoreModule,
     CartModule,
     WishlistModule,
+    StoreModule,
 
   ],
   controllers: [],
