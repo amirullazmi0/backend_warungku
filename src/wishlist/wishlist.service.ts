@@ -29,14 +29,15 @@ export class WishlistService {
     }
 
     async updateDataWishlist(user: user, body: wishlistRequest): Promise<WebResponse<any>> {
+        // Check if the item already exists in the wishlist
         const dataWishList = await this.prismaService.wishList.findFirst({
             where: {
                 userId: user.id,
                 itemStoreId: body.itemStoreId
             }
-        })
+        });
 
-        let message = ''
+        let message = '';
 
         if (dataWishList) {
             await this.prismaService.wishList.delete({
@@ -46,23 +47,22 @@ export class WishlistService {
                         userId: user.id
                     }
                 }
-            })
-
-            message = deleteDataSuccess
+            });
+            message = 'Item removed from wishlist successfully';  
         } else {
-            await this.prismaService.wishList.create({
+            const data = await this.prismaService.wishList.create({
                 data: {
                     itemStoreId: body.itemStoreId,
                     userId: user.id
                 }
-            })
-
-            message = postDataSuccess
+            });
+            message = 'Item added to wishlist successfully';
         }
 
+        // Return the success message
         return {
             message: message,
             success: true,
-        }
+        };
     }
 }

@@ -10,6 +10,6 @@ export class ItemStoreController {
 
   @Get()
   async getAll(@Auth() user: user, @Query('id') id?: string) {
-    return this.itemStoreService.getDataItemStore(id);
+    return this.itemStoreService.getDataItemStore(id, user);
   }
 }

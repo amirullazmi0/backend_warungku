@@ -6,6 +6,7 @@ export class authloginUserRequest {
 }
 
 export class authLoginUserResponse extends authloginUserRequest {
+  id: string
   email: string;
   fullName: string;
   accessToken: string;
