@@ -34,7 +34,7 @@ export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async checkAuth(user: user): Promise<WebResponse<any>> {
     try {
@@ -113,6 +113,7 @@ export class AuthService {
         success: true,
         message: authLoginSuccess,
         data: {
+          id: user.id,
           email: user.email,
           fullName: user.fullName,
           accessToken: user.accessToken,

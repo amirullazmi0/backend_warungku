@@ -5,15 +5,16 @@ import { Response } from 'express';
 import { userCreateRequestDTO } from 'DTO/user.dto';
 import { Auth } from 'src/common/auth.decorator';
 import { authloginUserRequest, authLoginUserResponse } from 'DTO/auth.dto';
+import { user } from '@prisma/client';
 // import { apiStore, apiUser } from 'src/cummon/url';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Get(`check-auth`)
-  async checkAuth(@Auth() user) {
-    return this.authService.checkAuth(user);
+  async checkAuth(@Auth() user: user) {
+    return await this.authService.checkAuth(user);
   }
 
   @Post(`register`)
