@@ -113,29 +113,43 @@ export class CartService {
     if (!user) {
       throw new NotFoundException('User not found or token invalid');
     }
+
     const dbUser = await this.prismaService.user.findUnique({
       where: { email: user.email },
     });
     if (!dbUser) {
       throw new NotFoundException('User not found in database');
     }
+
     const cartItems = await this.prismaService.$queryRaw`
-    SELECT
-      sc.id AS cart_id,
-      sc.qty AS quantity,
-      item.id AS item_id,
-      item.name AS item_name,
-      item.price AS item_price,
-      item."desc" AS item_description,
-      isi.path AS item_image_path,
-      c.name AS category_name
-        FROM shopping_cart_customer sc
+      SELECT
+        store.id AS store_id,
+        store.name AS store_name,
+        store.email AS store_email,
+        store.bio AS store_bio,
+        store.logo AS store_logo,
+        json_agg(
+          json_build_object(
+            'cart_id', sc.id,
+            'quantity', sc.qty,
+            'item_id', item.id,
+            'item_name', item.name,
+            'item_price', item.price,
+            'item_description', item."desc",
+            'item_image_path', isi.path,
+            'category_name', c.name
+          )
+        ) AS items
+      FROM shopping_cart_customer sc
       LEFT JOIN "item_store" AS item ON sc."itemStoreId" = item.id
       LEFT JOIN "item_store_images" isi ON item.id = isi."itemstoreId"
       LEFT JOIN "category_item_store" cis ON item.id = cis."itemStoreId"
       LEFT JOIN "category" c ON cis."categoryId" = c.id
-      WHERE sc."userId" = ${dbUser.id}::uuid;
+      LEFT JOIN "store" store ON item."userId" = store.id
+      WHERE sc."userId" = ${dbUser.id}::uuid
+      GROUP BY store.id, store.name, store.email, store.bio, store.logo;
     `;
+
     return {
       success: true,
       data: cartItems,

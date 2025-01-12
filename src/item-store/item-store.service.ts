@@ -7,9 +7,12 @@ import { user } from '@prisma/client';
 
 @Injectable()
 export class ItemStoreService {
-  constructor(private prismaService: PrismaService) { }
+  constructor(private prismaService: PrismaService) {}
 
-  async getDataItemStore(id?: string, user?: user): Promise<WebResponse<itemStoreResponse>> {
+  async getDataItemStore(
+    id?: string,
+    user?: user,
+  ): Promise<WebResponse<itemStoreResponse>> {
     try {
       const data: itemStore[] = await this.prismaService.$queryRaw`
       SELECT 
@@ -58,7 +61,7 @@ export class ItemStoreService {
           w."itemStoreId"
       ORDER BY item."createdAt" DESC;
 
-      ` ;
+      `;
 
       return {
         message: getDataSuccess,
