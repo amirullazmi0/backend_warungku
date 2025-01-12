@@ -136,13 +136,19 @@ export class CartService {
             'item_name', item.name,
             'item_price', item.price,
             'item_description', item."desc",
-            'item_image_path', isi.path,
+            'item_image_paths', img_paths.image_paths,
             'category_name', c.name
           )
         ) AS items
       FROM shopping_cart_customer sc
       LEFT JOIN "item_store" AS item ON sc."itemStoreId" = item.id
-      LEFT JOIN "item_store_images" isi ON item.id = isi."itemstoreId"
+      LEFT JOIN (
+        SELECT 
+          isi."itemstoreId", 
+          array_agg(DISTINCT isi.path) AS image_paths
+        FROM "item_store_images" isi
+        GROUP BY isi."itemstoreId"
+      ) AS img_paths ON item.id = img_paths."itemstoreId"
       LEFT JOIN "category_item_store" cis ON item.id = cis."itemStoreId"
       LEFT JOIN "category" c ON cis."categoryId" = c.id
       LEFT JOIN "store" store ON item."userId" = store.id
