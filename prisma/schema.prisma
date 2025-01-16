@@ -73,13 +73,16 @@ model wishList {
 }
 
 model shoppingCart {
-  id          String   @id @unique @default(uuid()) @db.Uuid
-  itemStoreId String   @db.Uuid
-  qty         Int      @db.Integer
-  user        user     @relation(fields: [userId], references: [id])
-  userId      String   @db.Uuid
-  reatedAt    DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String         @id @unique @default(uuid()) @db.Uuid
+  itemStoreId    String         @db.Uuid
+  qty            Int            @db.Integer
+  user           user           @relation(fields: [userId], references: [id])
+  userId         String         @db.Uuid
+  status_payment statusPayment? @default(UNPAID)
+  order_id       String?        @db.VarChar(255)
+  url_not_paid   String?        @db.VarChar(255)
+  reatedAt       DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   @@map("shopping_cart_customer")
 }
@@ -87,4 +90,10 @@ model shoppingCart {
 enum rolesUser {
   user
   super
+}
+
+enum statusPayment {
+  SETTLEMENT
+  PAID
+  UNPAID
 }
