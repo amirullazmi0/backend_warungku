@@ -81,6 +81,7 @@ model shoppingCart {
   status_payment statusPayment? @default(UNPAID)
   order_id       String?        @db.VarChar(255)
   url_not_paid   String?        @db.VarChar(255)
+  token_midtrans String?        @db.VarChar(255)
   reatedAt       DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 

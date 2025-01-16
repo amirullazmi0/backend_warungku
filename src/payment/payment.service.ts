@@ -38,6 +38,13 @@ export class PaymentService {
     if (!dbUser) {
       throw new NotFoundException('User not found in database');
     }
+
+    const userAddressRecord = await this.prismaService.userAddress.findFirst({
+      where: { userId: dbUser.id },
+      include: { address: true },
+    });
+
+    const addr = userAddressRecord?.address ?? userAddressRecord.address;
     try {
       const totalAmount = createPaymentDto.cartItems.reduce(
         (total, storeCart) => {
@@ -81,6 +88,20 @@ export class PaymentService {
         customer_details: {
           email: dbUser.email,
           first_name: dbUser.fullName,
+          phone: '+628123456789',
+          address: addr.jalan,
+          city: addr.kota,
+          postal_code: addr.kodepos,
+          country_code: 'IDN',
+        },
+        shipping_address: {
+          first_name: dbUser.fullName,
+          email: dbUser.email,
+          phone: '+628123456789',
+          address: addr.jalan,
+          city: addr.kota,
+          postal_code: addr.kodepos,
+          country_code: 'IDN',
         },
       };
       const response = await this.snap.createTransaction(parameter);
@@ -95,6 +116,7 @@ export class PaymentService {
           status_payment: 'SETTLEMENT',
           order_id: orderId,
           url_not_paid: response.redirect_url,
+          token_midtrans: response.token,
         },
       });
       return {
