@@ -152,7 +152,9 @@ export class CartService {
       LEFT JOIN "category_item_store" cis ON item.id = cis."itemStoreId"
       LEFT JOIN "category" c ON cis."categoryId" = c.id
       LEFT JOIN "store" store ON item."userId" = store.id
-      WHERE sc."userId" = ${dbUser.id}::uuid
+      WHERE 
+        sc."userId" = ${dbUser.id}::uuid
+      AND sc.status_payment = 'UNPAID'
       GROUP BY store.id, store.name, store.email, store.bio, store.logo;
     `;
 
@@ -160,6 +162,62 @@ export class CartService {
       success: true,
       data: cartItems,
     };
+  }
+
+  async findSettledOrders(accessToken: string) {
+    const user = await this.authService.validateUserFromToken(accessToken);
+    if (!user) {
+      throw new NotFoundException('User not found or token invalid');
+    }
+    const dbUser = await this.prismaService.user.findUnique({
+      where: { email: user.email },
+    });
+    if (!dbUser) {
+      throw new NotFoundException('User not found in database');
+    }
+    const query = `
+      SELECT
+        store.id AS store_id,
+        store.name AS store_name,
+        store.email AS store_email,
+        store.bio AS store_bio,
+        store.logo AS store_logo,
+        sc.url_not_paid,
+        sc.order_id,
+        json_agg(
+          json_build_object(
+            'cart_id', sc.id,
+            'quantity', sc.qty,
+            'item_id', item.id,
+            'item_name', item.name,
+            'item_price', item.price,
+            'item_description', item."desc",
+            'item_image_paths', img_paths.image_paths,
+            'category_name', c.name
+          )
+        ) AS items
+      FROM shopping_cart_customer sc
+      LEFT JOIN "item_store" AS item ON sc."itemStoreId" = item.id
+      LEFT JOIN (
+        SELECT 
+          isi."itemstoreId", 
+          array_agg(DISTINCT isi.path) AS image_paths
+        FROM "item_store_images" isi
+        GROUP BY isi."itemstoreId"
+      ) AS img_paths ON item.id = img_paths."itemstoreId"
+      LEFT JOIN "category_item_store" cis ON item.id = cis."itemStoreId"
+      LEFT JOIN "category" c ON cis."categoryId" = c.id
+      LEFT JOIN "store" store ON item."userId" = store.id
+      WHERE 
+        sc."userId" = $1::uuid
+        AND sc.status_payment = 'SETTLEMENT'
+      GROUP BY store.id, store.name, store.email, store.bio, store.logo, sc.url_not_paid, sc.order_id;
+    `;
+    const orders = await this.prismaService.$queryRawUnsafe(query, dbUser.id);
+    if (!orders) {
+      throw new NotFoundException('No settled orders found for the user.');
+    }
+    return orders;
   }
 
   async updateCartQty(accessToken: string, cartItemId: string, qty: number) {
