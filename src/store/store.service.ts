@@ -6,15 +6,13 @@ import { StoreGlobalsResponse, StoreResponse } from './response';
 
 @Injectable()
 export class StoreService {
-    constructor(
-        private prismaService: PrismaService
-    ) { }
+  constructor(private prismaService: PrismaService) {}
 
-    async getDataStore(id?: string): Promise<WebResponse<StoreGlobalsResponse>> {
-        let data: StoreResponse[]
+  async getDataStore(id?: string): Promise<WebResponse<StoreGlobalsResponse>> {
+    let data: StoreResponse[];
 
-        if (id) {
-            data = await this.prismaService.$queryRaw`
+    if (id) {
+      data = await this.prismaService.$queryRaw`
             select 
                 s.id,
                 s."name" ,
@@ -35,9 +33,9 @@ export class StoreService {
             from "store" s
             left join store_address sa on sa.id = s."addressId" 
             where s."rolesName" = 'user' and s.id = ${id}::uuid
-        `
-        } else {
-            data = await this.prismaService.$queryRaw`
+        `;
+    } else {
+      data = await this.prismaService.$queryRaw`
             select 
                 s.id,
                 s."name" ,
@@ -58,16 +56,16 @@ export class StoreService {
             from "store" s
             left join store_address sa on sa.id = s."addressId" 
             where s."rolesName" = 'user'
-        `
-        }
-
-        return {
-            message: getDataSuccess,
-            success: true,
-            data: {
-                record: data.length,
-                item: data
-            }
-        }
+        `;
     }
+
+    return {
+      message: getDataSuccess,
+      success: true,
+      data: {
+        record: data.length,
+        item: data,
+      },
+    };
+  }
 }
