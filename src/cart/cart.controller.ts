@@ -29,6 +29,12 @@ export class CartController {
     return this.cartService.getCartItems(token);
   }
 
+  @Get('settled')
+  async getSettledOrders(@Headers('authorization') authHeader: string) {
+    const token = authHeader.split(' ')[1];
+    return this.cartService.findSettledOrders(token);
+  }
+
   @Post('update-qty')
   async updateCartQty(@Body() updateCartQtyDto: UpdateCartQtyDto) {
     const { accessToken, itemStoreId, qty } = updateCartQtyDto;

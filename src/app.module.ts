@@ -3,14 +3,14 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CummonModule } from './common/cummon.module';
-import { TransactionModule } from './transaction/transaction.module';
 import { AddressService } from './address/address.service';
 import { AddressModule } from './address/address.module';
 
-import { ItemStoreController } from './item-store/item-store.controller';
 import { ItemStoreModule } from './item-store/item-store.module';
 import { CartModule } from './cart/cart.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { PaymentModule } from './payment/payment.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -23,9 +23,9 @@ import { WishlistModule } from './wishlist/wishlist.module';
     ItemStoreModule,
     CartModule,
     WishlistModule,
-
+    PaymentModule,
   ],
   controllers: [],
   providers: [AddressService],
 })
-export class AppModule { }
+export class AppModule {}
