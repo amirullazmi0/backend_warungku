@@ -214,7 +214,7 @@ export class CartService {
       WHERE 
         sc."userId" = $1::uuid
         AND sc.status_payment = 'SETTLEMENT'
-      GROUP BY store.id, store.name, store.email, store.bio, store.logo, sc.url_not_paid, sc.order_id, sc.token_midtrans;
+      GROUP BY store.id, store.name, store.email, store.bio, store.logo, sc.id;
     `;
     const orders = await this.prismaService.$queryRawUnsafe(query, dbUser.id);
     if (!orders) {
