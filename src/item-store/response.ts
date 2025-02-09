@@ -27,5 +27,10 @@ export interface itemStore {
         kota: string;
         provinsi: string;
     };
+
+    categories: {
+        id: string,
+        name: string
+    }[]
 }
 
