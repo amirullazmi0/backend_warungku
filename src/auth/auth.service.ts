@@ -4,7 +4,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { authLoginRequestSchema, authloginUserRequest, authLoginUserResponse } from 'DTO/auth.dto';
+import {
+  authLoginRequestSchema,
+  authloginUserRequest,
+  authLoginUserResponse,
+} from 'DTO/auth.dto';
 import {
   accountNotRegister,
   authLoginFailed,
@@ -34,7 +38,7 @@ export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   async checkAuth(user: user): Promise<WebResponse<any>> {
     try {

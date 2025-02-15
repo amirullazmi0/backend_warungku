@@ -8,6 +8,7 @@ import { CreatePaymentDto } from './dto/create-payment.dto';
 import * as midtransClient from 'midtrans-client';
 import { AuthService } from 'src/auth/auth.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PaymentService {
@@ -166,6 +167,89 @@ export class PaymentService {
           status_payment: 'PAID',
         },
       });
+
+      if (updated.count > 0) {
+        const cartItemsPaid = await this.prismaService.$queryRaw<
+          Array<{
+            sc_id: string;
+            sc_userId: string;
+            sc_itemStoreId: string;
+            sc_qty: number;
+            sc_order_id: string | null;
+            sc_status_payment: string;
+            item_id: string;
+            item_name: string;
+            item_qty: number;
+            item_price: number;
+            item_desc: string | null;
+            store_user_id: string;
+          }>
+        >(
+          Prisma.sql`
+          SELECT
+            sc.id AS sc_id,
+            sc."userId" AS sc_userId,
+            sc."itemStoreId" AS sc_itemStoreId,
+            sc.qty AS sc_qty,
+            sc.order_id AS sc_order_id,
+            sc.status_payment AS sc_status_payment,
+            i.id AS item_id,
+            i.name AS item_name,
+            i.qty AS item_qty,
+            i.price AS item_price,
+            i."desc" AS item_desc,
+            i."userId" as store_user_id
+          FROM "shopping_cart_customer" sc
+          JOIN "item_store" i ON sc."itemStoreId" = i.id
+          WHERE sc."userId" = ${dbUser.id}::uuid
+            AND sc.order_id = ${updatePaymentStatusDto.orderId}
+            AND sc.status_payment = 'PAID';
+          `,
+        );
+
+        const invoiceItems = cartItemsPaid.map((cartItem) => ({
+          cartItemId: cartItem.sc_id,
+          itemStoreId: cartItem.item_id,
+          itemName: cartItem.item_name,
+          price: cartItem.item_price,
+          quantity: cartItem.sc_qty,
+        }));
+
+        const total = invoiceItems.reduce((sum, item) => {
+          return sum + item.price * item.quantity;
+        }, 0);
+
+        const invoiceNumber = `INV-${Date.now()}`;
+        const storeUserId = cartItemsPaid[0].store_user_id;
+        const insertedTx = await this.prismaService.$queryRaw<
+          Array<{ id: string }>
+        >(Prisma.sql`
+          INSERT INTO transaction("id", "customerId", "invoice", "total", "userId", "createdAt", "updatedAt")
+          VALUES (
+            gen_random_uuid(),
+            ${dbUser.id}::uuid,
+            ${invoiceNumber},
+            ${total},
+            ${storeUserId}::uuid,
+            now(),
+            now()
+          )
+          RETURNING "id";
+        `);
+
+        const transactionId = insertedTx[0].id;
+
+        for (const item of invoiceItems) {
+          await this.prismaService.$executeRaw`
+            INSERT INTO transaction_item_store("transactionId", "itemStoreId", qty)
+            VALUES (
+              ${transactionId}::uuid,
+              ${item.itemStoreId}::uuid,
+              ${item.quantity}
+            )
+          `;
+        }
+      }
       return { success: true, updatedCount: updated.count };
     } catch (error) {
       console.error('Error updating payment status:', error);
