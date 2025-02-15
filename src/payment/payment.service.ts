@@ -219,7 +219,17 @@ export class PaymentService {
           return sum + item.price * item.quantity;
         }, 0);
 
-        const invoiceNumber = `INV-${Date.now()}`;
+        const randomPart = Math.floor(Math.random() * 1000000)
+          .toString()
+          .padStart(6, '0');
+        const invoiceNumber = `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${randomPart}`;
+        const invoice = {
+          invoiceNumber,
+          status: 'PAID',
+          items: invoiceItems,
+          date: new Date().toISOString(),
+        };
+
         const storeUserId = cartItemsPaid[0].store_user_id;
         const insertedTx = await this.prismaService.$queryRaw<
           Array<{ id: string }>
@@ -228,7 +238,7 @@ export class PaymentService {
           VALUES (
             gen_random_uuid(),
             ${dbUser.id}::uuid,
-            ${invoiceNumber},
+            ${invoice},
             ${total},
             ${storeUserId}::uuid,
             now(),
