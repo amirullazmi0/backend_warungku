@@ -1,6 +1,9 @@
 -- CreateEnum
 CREATE TYPE "rolesUser" AS ENUM ('user', 'super');
 
+-- CreateEnum
+CREATE TYPE "statusPayment" AS ENUM ('SETTLEMENT', 'PAID', 'UNPAID');
+
 -- CreateTable
 CREATE TABLE "customer_user" (
     "id" UUID NOT NULL,
@@ -59,6 +62,10 @@ CREATE TABLE "shopping_cart_customer" (
     "itemStoreId" UUID NOT NULL,
     "qty" INTEGER NOT NULL,
     "userId" UUID NOT NULL,
+    "status_payment" "statusPayment" DEFAULT 'UNPAID',
+    "order_id" VARCHAR(255),
+    "url_not_paid" VARCHAR(255),
+    "token_midtrans" VARCHAR(255),
     "reatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

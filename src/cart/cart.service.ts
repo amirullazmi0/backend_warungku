@@ -7,7 +7,7 @@ export class CartService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly authService: AuthService,
-  ) {}
+  ) { }
 
   async addToCart(accessToken: string, itemStoreId: string, qty: number) {
     const user = await this.authService.validateUserFromToken(accessToken);
@@ -138,8 +138,8 @@ export class CartService {
             'item_name', item.name,
             'item_price', item.price,
             'item_description', item."desc",
-            'item_image_paths', img_paths.image_paths,
-            'category_name', c.name
+            'item_image_paths', img_paths.image_paths
+            -- 'category_name', c.name
           )
         ) AS items
       FROM shopping_cart_customer sc
@@ -151,8 +151,8 @@ export class CartService {
         FROM "item_store_images" isi
         GROUP BY isi."itemstoreId"
       ) AS img_paths ON item.id = img_paths."itemstoreId"
-      LEFT JOIN "category_item_store" cis ON item.id = cis."itemStoreId"
-      LEFT JOIN "category" c ON cis."categoryId" = c.id
+      -- LEFT JOIN "category_item_store" cis ON item.id = cis."itemStoreId"
+      -- LEFT JOIN "category" c ON cis."categoryId" = c.id
       LEFT JOIN "store" store ON item."userId" = store.id
       WHERE 
         sc."userId" = ${dbUser.id}::uuid
@@ -195,8 +195,7 @@ export class CartService {
             'item_name', item.name,
             'item_price', item.price,
             'item_description', item."desc",
-            'item_image_paths', img_paths.image_paths,
-            'category_name', c.name
+            'item_image_paths', img_paths.image_paths
           )
         ) AS items
       FROM shopping_cart_customer sc
@@ -208,8 +207,6 @@ export class CartService {
         FROM "item_store_images" isi
         GROUP BY isi."itemstoreId"
       ) AS img_paths ON item.id = img_paths."itemstoreId"
-      LEFT JOIN "category_item_store" cis ON item.id = cis."itemStoreId"
-      LEFT JOIN "category" c ON cis."categoryId" = c.id
       LEFT JOIN "store" store ON item."userId" = store.id
       WHERE 
         sc."userId" = $1::uuid

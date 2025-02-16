@@ -21,9 +21,9 @@ async function main() {
     data: [
       {
         id: '57f2928c-b02b-49b6-892c-1b5640c0957c',
-        email: 'amirullazmi0@gmail.com',
-        fullName: 'amirullazmi0@gmail.com',
-        password: await bcrypt.hash('amirullazmi0@gmail.com', 10),
+        email: 'super@gmail.com',
+        fullName: 'super@gmail.com',
+        password: await bcrypt.hash('super@gmail.com', 10),
         rolesName: 'super',
         refreshToken: jwt.sign({ email: 'amirullazmi0@gmail.com' }),
         addressId: '4c8540e6-87a8-42a3-a413-58a94397b2a0',
