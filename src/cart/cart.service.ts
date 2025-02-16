@@ -212,7 +212,7 @@ export class CartService {
         sc."userId" = $1::uuid
         AND sc.status_payment = 'SETTLEMENT'
         AND sc."reatedAt" > NOW() - INTERVAL '24 HOURS'
-      GROUP BY store.id, store.name, store.email, store.bio, store.logo, sc.id;
+      GROUP BY store.id, store.name, store.email, store.bio, store.logo, sc.order_id, sc.url_not_paid, sc.token_midtrans;
     `;
     const orders = await this.prismaService.$queryRawUnsafe(query, dbUser.id);
     if (!orders) {
@@ -269,6 +269,61 @@ export class CartService {
       success: true,
       message: 'Cart item quantity updated',
       data: updatedCartItem,
+    };
+  }
+
+  async cancelOrder(accessToken: string, orderId: string) {
+    // 1) Validate user
+    const user = await this.authService.validateUserFromToken(accessToken);
+    if (!user) {
+      throw new NotFoundException('User not found or token invalid');
+    }
+    const dbUser = await this.prismaService.user.findUnique({
+      where: { email: user.email },
+    });
+    if (!dbUser) {
+      throw new NotFoundException('User not found in database');
+    }
+
+    // 2) Find all items in this order for the current user
+    const cartItems = await this.prismaService.shoppingCart.findMany({
+      where: {
+        userId: dbUser.id,
+        order_id: orderId,
+        status_payment: 'SETTLEMENT', // or 'UNPAID' or whatever statuses you want to allow cancellation from
+      },
+    });
+
+    if (cartItems.length === 0) {
+      throw new NotFoundException(
+        'No items found for this order or it is not cancellable.',
+      );
+    }
+
+    // 3) Restore item_store qty for each item
+    for (const item of cartItems) {
+      await this.prismaService.$executeRaw`
+        UPDATE item_store
+        SET qty = qty + ${item.qty}
+        WHERE id = ${item.itemStoreId}::uuid
+      `;
+    }
+
+    // 4) Update the shoppingCart items to CANCELLED
+    await this.prismaService.shoppingCart.updateMany({
+      where: {
+        userId: dbUser.id,
+        order_id: orderId,
+        status_payment: 'SETTLEMENT', // or 'UNPAID' if you want to allow cancellation from that status
+      },
+      data: {
+        status_payment: 'CANCELLED',
+      },
+    });
+
+    return {
+      success: true,
+      message: `Order ${orderId} has been cancelled and stock restored.`,
     };
   }
 }
