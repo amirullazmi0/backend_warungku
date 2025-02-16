@@ -97,4 +97,5 @@ enum statusPayment {
   SETTLEMENT
   PAID
   UNPAID
+  CANCELLED
 }

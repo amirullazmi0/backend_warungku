@@ -40,4 +40,10 @@ export class CartController {
     const { accessToken, itemStoreId, qty } = updateCartQtyDto;
     return this.cartService.updateCartQty(accessToken, itemStoreId, qty);
   }
+
+  @Post('cancel-order')
+  async cancelOrder(@Body() body: { accessToken: string; orderId: string }) {
+    const { accessToken, orderId } = body;
+    return this.cartService.cancelOrder(accessToken, orderId);
+  }
 }
