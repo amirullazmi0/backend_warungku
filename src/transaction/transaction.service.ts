@@ -17,11 +17,13 @@ export class TransactionsService {
   }
 
   async findAllByUser(accessToken: string) {
+    // 1) Validate the user token
     const user = await this.authService.validateUserFromToken(accessToken);
     if (!user) {
       throw new NotFoundException('User not found or token invalid');
     }
 
+    // 2) Retrieve the user record
     const dbUser = await this.prismaService.user.findUnique({
       where: { email: user.email },
     });
@@ -29,57 +31,72 @@ export class TransactionsService {
       throw new NotFoundException('User not found in database');
     }
 
+    // 3) Query shopping_cart_customer (sc) and item_store (i)
+    //    Group by order_id so each order is returned once,
+    //    building an invoice JSON with multiple items
     const transactions = await this.prismaService.$queryRaw<
       Array<{
         transaction_id: string;
         customerId: string;
-        invoice: any; // JSON object
-        total: number;
-        store_user_id: string;
+        invoice: any; // The rebuilt invoice JSON
+        total: string; // Casting sum to numeric => string
+        store_user_id: string | null;
         createdAt: Date;
         updatedAt: Date;
-        items: any; // aggregated array of items
         customer_fullName: string;
         customer_email: string;
         customer_address: string | null;
         customer_city: string | null;
       }>
     >(Prisma.sql`
-    SELECT 
-      t.id AS transaction_id,
-      t."customerId",
-      t.invoice,
-      t.total,
-      t."userId" AS store_user_id,
-      t."createdAt",
-      t."updatedAt",
-      json_agg(
-        json_build_object(
-          'itemStoreId',  tis."itemStoreId",
-          'qty',          tis.qty,
-          'itemName',     i.name,
-          'price',        i.price,
-          'desc',         i."desc",
-          'images', (
-            SELECT (array_agg(isi.path))[1]
-            FROM "item_store_images" isi
-            WHERE isi."itemstoreId" = i.id
+      SELECT
+        sc.order_id AS transaction_id,
+        sc."userId" AS customerId,
+        jsonb_build_object(
+          'date', MIN(sc."reatedAt")::text,
+          'invoiceNumber', sc.order_id,
+          'status', sc.status_payment,
+          'items', json_agg(
+            json_build_object(
+              'cartItemId', sc.id,
+              'itemStoreId', sc."itemStoreId",
+              'qty', sc.qty,
+              'itemName', i.name,
+              'price', i.price,
+              'desc', i."desc",
+              'images', (
+                SELECT (array_agg(isi.path))[1]
+                FROM "item_store_images" isi
+                WHERE isi."itemstoreId" = i.id
+              )
+            )
           )
-        )
-      ) AS items,
-      cu."fullName" AS customer_fullName,
-      cu.email AS customer_email,
-      ca.jalan AS customer_address,
-      ca.kota AS customer_city
-    FROM transaction t
-    JOIN transaction_item_store tis ON t.id = tis."transactionId"
-    JOIN item_store i ON tis."itemStoreId" = i.id
-    JOIN customer_user cu ON t."customerId" = cu.id
-    LEFT JOIN customer_address ca ON cu."addressId" = ca.id
-    WHERE t."customerId" = ${dbUser.id}::uuid
-    GROUP BY 
-      t.id, t."customerId", t.invoice, t.total, t."userId", t."createdAt", t."updatedAt",
-      cu."fullName", cu.email, ca.jalan, ca.kota
+        ) AS invoice,
+        -- Cast to numeric to avoid BigInt JSON serialization error
+        SUM(i.price * sc.qty)::numeric AS total,
+        -- Use MIN (or MAX) to pick a single store_user_id for the entire order
+        i."userId" AS store_user_id,
+        MIN(sc."reatedAt") AS createdAt,
+        MAX(sc."updatedAt") AS updatedAt,
+        cu."fullName" AS customer_fullName,
+        cu.email AS customer_email,
+        ca.jalan AS customer_address,
+        ca.kota AS customer_city
+      FROM shopping_cart_customer sc
+      JOIN item_store i ON sc."itemStoreId" = i.id
+      JOIN customer_user cu ON sc."userId" = cu.id
+      LEFT JOIN customer_address ca ON cu."addressId" = ca.id
+      WHERE sc."userId" = ${dbUser.id}::uuid
+      GROUP BY
+        i."userId",
+        sc.order_id,
+        sc.status_payment,
+        cu."fullName",
+        cu.email,
+        ca.jalan,
+        ca.kota,
+        sc."userId"
+      ORDER BY MIN(sc."reatedAt") DESC
     `);
 
     return transactions;
