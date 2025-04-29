@@ -7,7 +7,7 @@ export class CartService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly authService: AuthService,
-  ) { }
+  ) {}
 
   async addToCart(accessToken: string, itemStoreId: string, qty: number) {
     const user = await this.authService.validateUserFromToken(accessToken);
