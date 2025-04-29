@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthService } from 'src/auth/auth.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CartService {
@@ -320,6 +321,17 @@ export class CartService {
         status_payment: 'CANCELLED',
       },
     });
+
+    await this.prismaService.$executeRaw(
+      Prisma.sql`
+        UPDATE transaction
+        SET
+          invoice    = jsonb_set(invoice, '{status}', '"CANCELLED"'::jsonb),
+          "updatedAt" = now()
+        WHERE invoice->>'invoiceNumber' = ${orderId}
+          AND "customerId" = ${dbUser.id}::uuid;
+      `,
+    );
 
     return {
       success: true,

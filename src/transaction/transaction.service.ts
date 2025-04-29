@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-// import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthService } from 'src/auth/auth.service';
@@ -150,7 +150,7 @@ export class TransactionsService {
       JOIN item_store i ON tis."itemStoreId" = i.id
       JOIN customer_user cu ON t."customerId" = cu.id
       LEFT JOIN customer_address ca ON cu."addressId" = ca.id
-      WHERE t.invoice::json->>'status' = 'PAID'
+      -- WHERE t.invoice::json->>'status' = 'PAID'
       GROUP BY 
         t.id, t."customerId", t.invoice, t.total, t."userId", t."createdAt", t."updatedAt",
         cu."fullName", cu.email, ca.jalan, ca.kota
@@ -176,65 +176,57 @@ export class TransactionsService {
         transaction_id: string;
         customerId: string;
         invoice: any;
-        total: string;
-        store_user_id: string | null;
+        total: number;
+        store_user_id: string;
         createdAt: Date;
         updatedAt: Date;
+        items: any;
         customer_fullName: string;
         customer_email: string;
         customer_address: string | null;
         customer_city: string | null;
       }>
     >(Prisma.sql`
-    SELECT
-      sc.order_id   AS transaction_id,
-      sc."userId"   AS customerId,
+      SELECT 
+      t.id AS transaction_id,
+      t."customerId",
       jsonb_build_object(
-        'date',         MIN(sc."reatedAt")::text,
-        'invoiceNumber', sc.order_id,
-        'status',       sc.status_payment,
-        'items',        json_agg(
-                          json_build_object(
-                            'cartItemId', sc.id,
-                            'itemStoreId', sc."itemStoreId",
-                            'qty',         sc.qty,
-                            'itemName',    i.name,
-                            'price',       i.price,
-                            'desc',        i."desc",
-                            'images',      (
-                              SELECT (array_agg(isi.path))[1]
-                              FROM "item_store_images" isi
-                              WHERE isi."itemstoreId" = i.id
-                            )
-                          )
-                        )
-      )                         AS invoice,
-      SUM(i.price * sc.qty)::numeric AS total,
-      i."userId"                AS store_user_id,
-      MIN(sc."reatedAt")        AS createdAt,
-      MAX(sc."updatedAt")       AS updatedAt,
-      cu."fullName"             AS customer_fullName,
-      cu.email                  AS customer_email,
-      ca.jalan                  AS customer_address,
-      ca.kota                   AS customer_city
-    FROM shopping_cart_customer sc
-      JOIN item_store i       ON sc."itemStoreId" = i.id
-      JOIN customer_user cu   ON sc."userId"      = cu.id
-      LEFT JOIN customer_address ca
-        ON cu."addressId"     = ca.id
-    WHERE sc."userId" = ${dbUser.id}::uuid
-      AND sc.status_payment::text = ${status}
-    GROUP BY
-      i."userId",
-      sc.order_id,
-      sc.status_payment,
-      cu."fullName",
-      cu.email,
-      ca.jalan,
-      ca.kota,
-      sc."userId"
-    ORDER BY MIN(sc."reatedAt") DESC
-      `);
+        'date', t.invoice::json->>'date',
+        'invoiceNumber', t.invoice::json->>'invoiceNumber',
+        'status', t.invoice::json->>'status',
+        'items', json_agg(
+          json_build_object(
+            'itemStoreId', tis."itemStoreId",
+            'qty', tis.qty,
+            'itemName', i.name,
+            'price', i.price,
+            'desc', i."desc",
+            'images', (
+              SELECT (array_agg(isi.path))[1]
+              FROM "item_store_images" isi
+              WHERE isi."itemstoreId" = i.id
+            )
+          )
+        )
+      ) AS invoice,
+      t.total,
+      t."userId" AS store_user_id,
+      t."createdAt",
+      t."updatedAt",
+      cu."fullName" AS customer_fullName,
+      cu.email AS customer_email,
+      ca.jalan AS customer_address,
+      ca.kota AS customer_city
+    FROM transaction t
+    JOIN transaction_item_store tis ON t.id = tis."transactionId"
+    JOIN item_store i ON tis."itemStoreId" = i.id
+    JOIN customer_user cu ON t."customerId" = cu.id
+    LEFT JOIN customer_address ca ON cu."addressId" = ca.id
+    WHERE t.invoice::json->>'status' = ${status}
+      AND i."userId" = ${dbUser.id}::uuid
+    GROUP BY 
+      t.id, t."customerId", t.invoice, t.total, t."userId", t."createdAt", t."updatedAt",
+      cu."fullName", cu.email, ca.jalan, ca.kota`);
 
     return transactions;
   }
