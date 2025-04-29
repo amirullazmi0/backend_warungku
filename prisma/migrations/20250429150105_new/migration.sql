@@ -2,7 +2,7 @@
 CREATE TYPE "rolesUser" AS ENUM ('user', 'super');
 
 -- CreateEnum
-CREATE TYPE "statusPayment" AS ENUM ('SETTLEMENT', 'PAID', 'UNPAID');
+CREATE TYPE "statusPayment" AS ENUM ('SETTLEMENT', 'PAID', 'UNPAID', 'CANCELLED');
 
 -- CreateTable
 CREATE TABLE "customer_user" (
