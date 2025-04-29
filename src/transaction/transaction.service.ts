@@ -150,7 +150,7 @@ export class TransactionsService {
       JOIN item_store i ON tis."itemStoreId" = i.id
       JOIN customer_user cu ON t."customerId" = cu.id
       LEFT JOIN customer_address ca ON cu."addressId" = ca.id
-      WHERE t.invoice::json->>'status' = 'PAID'
+      -- WHERE t.invoice::json->>'status' = 'PAID'
       GROUP BY 
         t.id, t."customerId", t.invoice, t.total, t."userId", t."createdAt", t."updatedAt",
         cu."fullName", cu.email, ca.jalan, ca.kota
