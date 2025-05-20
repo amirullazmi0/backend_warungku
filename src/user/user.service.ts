@@ -136,8 +136,11 @@ export class UserService {
       let dataImages: string = undefined
       if (images) {
         if (images.mimetype.startsWith('image/')) {
-          const saveImages = await this.attachmentService.createImage(images)
-          dataImages = saveImages.path.toString()
+          const saveImages = await this.attachmentService.saveFileImageKit({
+            file: images,
+            folder: `/user/${user.id}`
+          })
+          dataImages = saveImages.path
         } else {
           throw new BadRequestException(fileMustImage)
         }

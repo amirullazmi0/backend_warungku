@@ -8,10 +8,21 @@ import * as mime from 'mime-types';
 import { createFileFailed, createFileSuccess } from 'DTO/message';
 import { ConfigService } from '@nestjs/config';
 const fs = require('fs');
+import ImageKit from "imagekit";
 
 @Injectable()
 export class AttachmentService {
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) { }
+
+  private publicKeyImageKit = process.env.PUBLIC_KEY_IMAGE_KIT
+  private privateKeyImageKit = process.env.PRIVATE_KEY_IMAGE_KIT
+  private urlImageKit = process.env.URL_IMAGE_KIT
+
+  private imageKit = new ImageKit({
+    publicKey: this.publicKeyImageKit,
+    privateKey: this.privateKeyImageKit,
+    urlEndpoint: this.urlImageKit,
+  })
 
   async createImage(
     file: Express.Multer.File | Express.Multer.File[],
@@ -67,6 +78,31 @@ export class AttachmentService {
         message: '',
         path: path,
       };
-    } catch (error) {}
+    } catch (error) { }
+  }
+
+  async saveFileImageKit({
+    file,
+    folder,
+  }: {
+    file: Express.Multer.File;
+    folder?: string;
+  }): Promise<{ path: string }> {
+    const imageSave = this.imageKit.upload({
+      file: file.buffer,
+      folder: `/shopowns${folder}`,
+      fileName: file.originalname,
+      extensions: [
+        {
+          name: 'google-auto-tagging',
+          maxTags: 5,
+          minConfidence: 95,
+        },
+      ],
+    })
+
+    return {
+      path: (await imageSave).url
+    }
   }
 }
