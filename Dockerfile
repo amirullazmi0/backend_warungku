@@ -24,7 +24,7 @@ RUN npx prisma generate
 RUN yarn build
 
 # Buka port aplikasi
-EXPOSE 4001
+EXPOSE 4002
 
 # Jalankan aplikasi
-CMD ["node", "dist/src/main"]
+CMD ["yarn", "start"]
