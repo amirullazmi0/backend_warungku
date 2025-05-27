@@ -38,7 +38,7 @@ export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async checkAuth(user: user): Promise<WebResponse<any>> {
     try {
@@ -76,16 +76,28 @@ export class AuthService {
     res: Response,
   ): Promise<WebResponse<authLoginUserResponse>> {
     try {
+      if (!req.email || !req.password) {
+        throw new BadRequestException('Email and password are required');
+      }
       const validate = authLoginRequestSchema.parse({
         email: req.email,
         password: req.password,
       });
+
 
       let user = await this.prismaService.user.findFirst({
         where: { email: validate.email },
       });
 
       if (!user) {
+        throw new BadRequestException(accountNotRegister);
+      }
+
+      if (!user) {
+        throw new BadRequestException(accountNotRegister);
+      }
+
+      if (!user.password) {
         throw new BadRequestException(accountNotRegister);
       }
       const isPasswordValid = await bcrypt.compare(req.password, user.password);
