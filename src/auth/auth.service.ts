@@ -71,35 +71,25 @@ export class AuthService {
     }
   }
 
-  async login(
-    req: authloginUserRequest,
-    res: Response,
-  ): Promise<WebResponse<authLoginUserResponse>> {
+  async login(req: authloginUserRequest): Promise<WebResponse<authLoginUserResponse>> {
     try {
       if (!req.email || !req.password) {
         throw new BadRequestException('Email and password are required');
       }
+
       const validate = authLoginRequestSchema.parse({
         email: req.email,
         password: req.password,
       });
 
-
-      let user = await this.prismaService.user.findFirst({
+      const user = await this.prismaService.user.findFirst({
         where: { email: validate.email },
       });
 
-      if (!user) {
+      if (!user || !user.password) {
         throw new BadRequestException(accountNotRegister);
       }
 
-      if (!user) {
-        throw new BadRequestException(accountNotRegister);
-      }
-
-      if (!user.password) {
-        throw new BadRequestException(accountNotRegister);
-      }
       const isPasswordValid = await bcrypt.compare(req.password, user.password);
 
       if (!isPasswordValid) {
@@ -111,19 +101,12 @@ export class AuthService {
         roles: 'user',
       });
 
-      user = await this.prismaService.user.update({
+      await this.prismaService.user.update({
         where: { email: validate.email },
-        data: {
-          accessToken: access_token,
-        },
+        data: { accessToken: access_token },
       });
 
-      const expirationTime = 7 * 24 * 60 * 60 * 1000;
-
-      res.cookie('access-token', user.accessToken, {
-        maxAge: expirationTime,
-        httpOnly: true,
-      });
+      // Jangan manipulate res di sini, biarkan controller yang handle response
 
       return {
         success: true,
@@ -132,18 +115,20 @@ export class AuthService {
           id: user.id,
           email: user.email,
           fullName: user.fullName,
-          accessToken: user.accessToken,
+          accessToken: access_token,
           refreshToken: user.refreshToken,
         } as authLoginUserResponse,
       };
     } catch (error) {
-      return {
-        success: false,
-        message: authLoginFailed,
-        errors: error,
-      };
+      if (error instanceof BadRequestException) {
+        throw error; // lempar ke controller untuk response error otomatis
+      }
+      console.error('Login error:', error);
+      throw new BadRequestException(authLoginFailed);
     }
   }
+
+
   async register(
     body: userCreateRequestDTO,
   ): Promise<WebResponse<userCRUDResponse>> {
