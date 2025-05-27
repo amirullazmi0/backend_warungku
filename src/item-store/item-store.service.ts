@@ -7,32 +7,32 @@ import { Prisma, user } from '@prisma/client';
 
 @Injectable()
 export class ItemStoreService {
-  constructor(private prismaService: PrismaService) { }
+  constructor(private prismaService: PrismaService) {}
 
   async getDataItemStore(
     id?: string,
     user?: user,
     keyword?: string,
-    category?: string[]
+    category?: string[],
   ): Promise<WebResponse<itemStoreResponse>> {
     try {
       const conditions: Prisma.Sql[] = [];
 
-      if (id && id !== "") {
+      if (id && id !== '') {
         conditions.push(Prisma.sql`item.id = ${id}::UUID`);
       }
 
       if (keyword && keyword != null) {
         conditions.push(
-          Prisma.sql`(item.name ILIKE '%' || ${keyword} || '%' OR c.name ILIKE '%' || ${keyword} || '%')`
+          Prisma.sql`(item.name ILIKE '%' || ${keyword} || '%' OR c.name ILIKE '%' || ${keyword} || '%')`,
         );
       }
 
       if (category && category.length > 0) {
         conditions.push(
           Prisma.sql`c.id IN (${Prisma.join(
-            category.map((cat) => Prisma.sql`${cat}::UUID`)
-          )})`
+            category.map((cat) => Prisma.sql`${cat}::UUID`),
+          )})`,
         );
       }
 
@@ -113,25 +113,21 @@ export class ItemStoreService {
     }
   }
 
-
-
   async getCategory(): Promise<WebResponse<any>> {
     try {
-
       const data = await this.prismaService.$queryRaw`
         select * from "category"
-      `
+      `;
       return {
         success: true,
         message: getDataSuccess,
-        data: data
-      }
+        data: data,
+      };
     } catch (error) {
       return {
         success: false,
         message: getDataFailed,
-      }
+      };
     }
   }
 }
-

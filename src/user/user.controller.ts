@@ -19,6 +19,8 @@ import { apiUser } from 'src/common/url';
 import { userUpdateRequest } from 'DTO/user.dto';
 import { Auth } from 'src/common/auth.decorator';
 import { addressUpdateRequest } from 'DTO/address.dto';
+import { HttpStatusCode } from 'axios';
+import { unAuthorized } from 'DTO/message';
 
 @Controller()
 export class UserController {
@@ -29,6 +31,12 @@ export class UserController {
 
   @Get(`${apiUser}/list-user`)
   async getAll(@Auth() user: user, @Query('id') id?: string) {
+    if (user.id !== id) {
+      return {
+        statusCode: HttpStatus.FORBIDDEN,
+        message: 'You are not allowed to access this user',
+      };
+    }
     return this.userService.getData(id);
   }
 
@@ -43,6 +51,12 @@ export class UserController {
     @Param('id') id: string,
     @Body() req: userUpdateRequest,
   ) {
+    if (!user) {
+      return {
+        statusCode: HttpStatusCode.Unauthorized,
+        message: unAuthorized,
+      };
+    }
     return this.userService.updateUserbyId(id, req);
   }
   @Put(`${apiUser}/update/profile`)

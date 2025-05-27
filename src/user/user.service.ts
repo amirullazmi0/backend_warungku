@@ -1,22 +1,40 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+// import { JwtService } from '@nestjs/jwt';
 import { user } from '@prisma/client';
-import { dataNotFound, deleteDataFailed, deleteDataSuccess, emailIsUnique, fileMustImage, getDataFailed, getDataSuccess, updateDataFailed, updateDataSuccess } from 'DTO/message';
+import {
+  dataNotFound,
+  deleteDataFailed,
+  deleteDataSuccess,
+  fileMustImage,
+  getDataFailed,
+  getDataSuccess,
+  updateDataFailed,
+  updateDataSuccess,
+} from 'DTO/message';
 import { WebResponse } from 'DTO/globals.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import * as bcrypt from "bcrypt";
 import { AttachmentService } from 'src/attachment/attachment.service';
-import { userCreateSchema, userUpdateRequest, userUpdateSchema } from 'DTO/user.dto';
+import {
+  userCreateSchema,
+  userUpdateRequest,
+  userUpdateSchema,
+} from 'DTO/user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private prismaService: PrismaService,
-    private jwtService: JwtService,
-    private attachmentService: AttachmentService
-  ) { }
+    // private jwtService: JwtService,
+    private attachmentService: AttachmentService,
+  ) {}
 
-  async getData(id?: string): Promise<WebResponse<{ record: number | undefined; user: user[] | user; }>> {
+  async getData(
+    id?: string,
+  ): Promise<WebResponse<{ record: number | undefined; user: user[] | user }>> {
     try {
       let user: user | user[];
 
@@ -53,7 +71,7 @@ export class UserService {
         message: getDataSuccess,
         data: {
           record: Array.isArray(user) ? user.length : undefined,
-          user: user
+          user: user,
         },
       };
     } catch (error) {
@@ -66,10 +84,10 @@ export class UserService {
   }
   async getProfile(user: user): Promise<WebResponse<user>> {
     try {
-      let profile = await this.prismaService.user.findFirst({
+      const profile = await this.prismaService.user.findFirst({
         where: { id: user.id },
         include: {
-          address: true
+          address: true,
           // roles: true,
           // transactions: true,
         },
@@ -78,7 +96,7 @@ export class UserService {
       return {
         success: true,
         message: getDataSuccess,
-        data: profile
+        data: profile,
       };
     } catch (error) {
       return {
@@ -89,60 +107,67 @@ export class UserService {
     }
   }
 
-  async updateUserbyId(id: string, req: userUpdateRequest): Promise<WebResponse<any>> {
+  async updateUserbyId(
+    id: string,
+    req: userUpdateRequest,
+  ): Promise<WebResponse<any>> {
     let user = await this.prismaService.user.findFirst({
-      where: { id: id }
-    })
+      where: { id: id },
+    });
 
     if (!user) {
-      throw new NotFoundException(dataNotFound)
+      throw new NotFoundException(dataNotFound);
     }
 
     const validate = userCreateSchema.parse({
       email: req.email ? req.email : user.email,
       fullName: req.fullName ? req.fullName : user.fullName,
-      addressId: req.addressId ? req.addressId : user.addressId
-    })
+      addressId: req.addressId ? req.addressId : user.addressId,
+    });
 
     user = await this.prismaService.user.update({
       where: { id: user.id },
-      data: validate as Partial<userUpdateRequest>
-    })
+      data: validate as Partial<userUpdateRequest>,
+    });
     try {
       return {
         success: true,
         message: updateDataSuccess,
-        data: validate
-      }
+        data: validate,
+      };
     } catch (error) {
       return {
         success: false,
         message: updateDataFailed,
-        errors: error
-      }
+        errors: error,
+      };
     }
   }
 
-  async updateUserProfile(user: user, req: userUpdateRequest, images?: Express.Multer.File): Promise<WebResponse<any>> {
+  async updateUserProfile(
+    user: user,
+    req: userUpdateRequest,
+    images?: Express.Multer.File,
+  ): Promise<WebResponse<any>> {
     try {
       let profile = await this.prismaService.user.findFirst({
-        where: { id: user.id }
-      })
+        where: { id: user.id },
+      });
 
       if (!profile) {
-        throw new NotFoundException(dataNotFound)
+        throw new NotFoundException(dataNotFound);
       }
 
-      let dataImages: string = undefined
+      let dataImages: string = undefined;
       if (images) {
         if (images.mimetype.startsWith('image/')) {
           const saveImages = await this.attachmentService.saveFileImageKit({
             file: images,
-            folder: `/user/${user.id}`
-          })
-          dataImages = saveImages.path
+            folder: `/user/${user.id}`,
+          });
+          dataImages = saveImages.path;
         } else {
-          throw new BadRequestException(fileMustImage)
+          throw new BadRequestException(fileMustImage);
         }
       }
 
@@ -150,84 +175,51 @@ export class UserService {
         email: req.email ? req.email : user.email,
         fullName: req.fullName ? req.fullName : user.fullName,
         addressId: req.addressId ? req.addressId : user.addressId,
-        images: dataImages ? dataImages : user.images
-      })
+        images: dataImages ? dataImages : user.images,
+      });
 
       profile = await this.prismaService.user.update({
         where: { id: user.id },
-        data: validate
-      })
+        data: validate,
+      });
       return {
         success: true,
         message: updateDataSuccess,
-        data: validate
-      }
+        data: validate,
+      };
     } catch (error) {
       return {
         success: false,
         message: updateDataFailed,
-        errors: error
-      }
+        errors: error,
+      };
     }
   }
 
   async deleteUserById(id: string): Promise<WebResponse<{ message: string }>> {
     let user = await this.prismaService.user.findFirst({
-      where: { id: id }
-    })
+      where: { id: id },
+    });
 
     if (!user) {
-      throw new NotFoundException(dataNotFound)
+      throw new NotFoundException(dataNotFound);
     }
 
     user = await this.prismaService.user.delete({
-      where: { id: id }
-    })
+      where: { id: id },
+    });
 
     try {
       return {
         success: true,
-        message: deleteDataSuccess
-      }
+        message: deleteDataSuccess,
+      };
     } catch (error) {
       return {
         success: false,
         message: deleteDataFailed,
-        errors: error
-      }
-    }
-  }
-
-  async updateImagesProfile(user: user, images?: Express.Multer.File): Promise<WebResponse<any>> {
-    try {
-      let dataImages: string = undefined
-
-      if (images) {
-        if (images.mimetype.startsWith('image/')) {
-          const saveImages = await this.attachmentService.createImage(images)
-          dataImages = saveImages.path.toString()
-        } else {
-          throw new BadRequestException(fileMustImage)
-        }
-      }
-
-      await this.prismaService.user.update({
-        where: { id: user.id },
-        data: {
-          images: dataImages
-        }
-      })
-
-      return {
-        success: true,
-        message: updateDataSuccess,
-      }
-    } catch (error) {
-      return {
-        success: false,
-        message: updateDataFailed,
-        errors: error
-      }
+        errors: error,
+      };
     }
   }
 }

@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { WebResponse } from 'DTO/globals.dto';
 import { getDataSuccess } from 'DTO/message';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { StoreGlobalsResponse, StoreResponse, StoreWithItems } from './response';
+import { StoreGlobalsResponse, StoreResponse } from './response';
 import { Prisma, user } from '@prisma/client';
 import { itemStore } from 'src/item-store/response';
 
 @Injectable()
 export class StoreService {
-  constructor(private prismaService: PrismaService) { }
+  constructor(private prismaService: PrismaService) {}
 
   async getDataStore(id?: string): Promise<WebResponse<StoreGlobalsResponse>> {
     let data: StoreResponse[];
@@ -71,8 +71,10 @@ export class StoreService {
     };
   }
 
-  async getDataItemStore(id: string, user: user): Promise<WebResponse<itemStore[]>> {
-
+  async getDataItemStore(
+    id: string,
+    user: user,
+  ): Promise<WebResponse<itemStore[]>> {
     const data: itemStore[] = await this.prismaService.$queryRaw(
       Prisma.sql`
             SELECT 
@@ -120,13 +122,13 @@ export class StoreService {
                 s."name", 
                 w."itemStoreId"
             ORDER BY item."createdAt" DESC;
-            `
+            `,
     );
 
     return {
       message: getDataSuccess,
       success: true,
-      data: data
+      data: data,
     };
   }
 }

@@ -27,7 +27,7 @@ export interface ItemStore {
   itemId: string;
   itemName: string;
   itemPrice: number;
-  itemDesc?: string
+  itemDesc?: string;
   // Add more fields as necessary from the item_store table
 }
 

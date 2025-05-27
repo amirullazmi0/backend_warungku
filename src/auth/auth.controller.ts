@@ -4,9 +4,8 @@ import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { userCreateRequestDTO } from 'DTO/user.dto';
 import { Auth } from 'src/common/auth.decorator';
-import { authloginUserRequest, authLoginUserResponse } from 'DTO/auth.dto';
+import { authloginUserRequest } from 'DTO/auth.dto';
 import { user } from '@prisma/client';
-// import { apiStore, apiUser } from 'src/cummon/url';
 
 @Controller('auth')
 export class AuthController {
