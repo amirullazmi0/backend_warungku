@@ -25,9 +25,9 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'public'));
 
   const env = app.get(ConfigService);
-  const port = env.get('PORT') || 3000;
+  const port = env.get('PORT') || 4002;
 
-  await app.listen(port, '0.0.0.0');
-  console.log(`Application running on: http://0.0.0.0:${port}`);
+  await app.listen(port);
+  console.log(`Application running on port: ${port}`);
 }
 bootstrap();
