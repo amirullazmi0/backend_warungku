@@ -3,14 +3,14 @@ import ImageKit from 'imagekit';
 
 @Injectable()
 export class AttachmentService {
-  private publicKeyImageKit = process.env.PUBLIC_KEY_IMAGE_KIT;
-  private privateKeyImageKit = process.env.PRIVATE_KEY_IMAGE_KIT;
-  private urlImageKit = process.env.URL_IMAGE_KIT;
+  // private publicKeyImageKit = process.env.PUBLIC_KEY_IMAGE_KIT;
+  // private privateKeyImageKit = process.env.PRIVATE_KEY_IMAGE_KIT;
+  // private urlImageKit = process.env.URL_IMAGE_KIT;
 
-  private imageKit = new ImageKit({
-    publicKey: this.publicKeyImageKit,
-    privateKey: this.privateKeyImageKit,
-    urlEndpoint: this.urlImageKit,
+  private imagekit = new ImageKit({
+    publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+    privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+    urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
   });
 
   async saveFileImageKit({
@@ -20,7 +20,7 @@ export class AttachmentService {
     file: Express.Multer.File;
     folder?: string;
   }): Promise<{ path: string }> {
-    const imageSave = this.imageKit.upload({
+    const imageSave = this.imagekit.upload({
       file: file.buffer,
       folder: `/shopowns${folder}`,
       fileName: file.originalname,
