@@ -14,17 +14,16 @@ async function bootstrap() {
   });
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const env = app.get(ConfigService);
 
   app.enableCors({
-    origin: '*',
+    origin: env.get('CORS_ORIGIN'),
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
 
   app.useStaticAssets(join(__dirname, '..', 'public'));
 
-  const env = app.get(ConfigService);
   const port = env.get('PORT') || 4002;
 
   await app.listen(port);
