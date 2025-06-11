@@ -1,0 +1,55 @@
+DB USER
+
+-- Mengaktifkan ekstensi postgres_fdw
+CREATE EXTENSION postgres_fdw;
+
+-- Membuat server foreign data wrapper
+CREATE SERVER store_server
+FOREIGN DATA WRAPPER postgres_fdw
+OPTIONS (host '103.150.101.172', dbname 'db_store_warungku', port '5433');
+
+-- Membuat user mapping untuk server yang baru dibuat
+CREATE USER MAPPING FOR user
+SERVER store_server
+OPTIONS (user 'postgres', password 'loremipsum');
+
+-- Mengimpor skema dan tabel dari server
+IMPORT FOREIGN SCHEMA public
+LIMIT TO (store)
+FROM SERVER store_server
+INTO public;
+
+IMPORT FOREIGN SCHEMA public
+LIMIT TO (store_address)
+FROM SERVER store_server
+INTO public;
+
+IMPORT FOREIGN SCHEMA public
+LIMIT TO (item_store)
+FROM SERVER store_server
+INTO public;
+
+IMPORT FOREIGN SCHEMA public
+LIMIT TO (item_store_images)
+FROM SERVER store_server
+INTO public;
+
+IMPORT FOREIGN SCHEMA public
+LIMIT TO (category)
+FROM SERVER store_server
+INTO public;
+
+IMPORT FOREIGN SCHEMA public
+LIMIT TO (category_item_store)
+FROM SERVER store_server
+INTO public;
+
+IMPORT FOREIGN SCHEMA public
+LIMIT TO (transaction)
+FROM SERVER store_server
+INTO public;
+
+IMPORT FOREIGN SCHEMA public
+LIMIT TO (transaction_item_store)
+FROM SERVER store_server
+INTO public;

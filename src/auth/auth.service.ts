@@ -109,6 +109,8 @@ export class AuthService {
       const access_token = await this.jwtService.sign({
         email: user.email,
         roles: 'user',
+      }, {
+        expiresIn: '7d'
       });
 
       user = await this.prismaService.user.update({
