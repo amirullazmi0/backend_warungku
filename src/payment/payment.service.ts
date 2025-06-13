@@ -21,8 +21,8 @@ export class PaymentService {
     this.authService = authService;
     this.snap = new midtransClient.Snap({
       isProduction: false,
-      clientKey: 'SB-Mid-client-dBBQUKjpnK4g7ZdX',
-      serverKey: 'SB-Mid-server-_A_igu_I96YXQlyDCawTxWpQ',
+      clientKey: 'SB-Mid-client-g7DzPGpxRHrj04Vn',
+      serverKey: 'SB-Mid-server-IIVdFLgfdJMn8q6k5GnrzlKo',
     });
   }
 

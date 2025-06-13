@@ -14,7 +14,7 @@ import { apiPayment } from 'src/common/url';
 
 @Controller(`${apiPayment}`)
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(private readonly paymentService: PaymentService) { }
 
   @Post()
   async create(@Body() createPaymentDto: CreatePaymentDto) {

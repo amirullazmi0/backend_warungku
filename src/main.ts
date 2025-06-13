@@ -28,8 +28,8 @@ async function bootstrap() {
         callback(new Error('Not allowed by CORS'));
       }
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true,
+    methods: ['*'],
+    // credentials: true,
   });
 
   app.useStaticAssets(join(__dirname, '..', 'public'));
