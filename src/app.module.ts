@@ -12,6 +12,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
 import { StoreModule } from './store/store.module';
 import { PaymentModule } from './payment/payment.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { GuestModule } from './guest/guest.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { TransactionModule } from './transaction/transaction.module';
     WishlistModule,
     StoreModule,
     PaymentModule,
+    GuestModule,
   ],
   controllers: [],
   providers: [AddressService],

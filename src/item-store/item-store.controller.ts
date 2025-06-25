@@ -8,7 +8,7 @@ import { HttpStatusCode } from 'axios';
 
 @Controller(`${apiUser}/item-store`)
 export class ItemStoreController {
-  constructor(private itemStoreService: ItemStoreService) {}
+  constructor(private itemStoreService: ItemStoreService) { }
 
   @Get()
   async getAll(
@@ -44,6 +44,28 @@ export class ItemStoreController {
         message: unAuthorized,
       };
     }
+    return this.itemStoreService.getCategory();
+  }
+
+  @Get('/guest')
+  async getGuestAll(
+    @Query('id') id?: string,
+    @Query('keyword') keyword?: string,
+    @Query('category') category?: string | string[],
+  ) {
+    const categoryIds = Array.isArray(category)
+      ? category
+      : category?.split(',');
+
+    return this.itemStoreService.getDataItemStoreGuest(
+      id,
+      keyword,
+      categoryIds,
+    );
+  }
+
+  @Get('/guest/category')
+  async getGuestCategory() {
     return this.itemStoreService.getCategory();
   }
 }

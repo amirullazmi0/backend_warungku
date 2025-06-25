@@ -1,18 +1,15 @@
-FROM node:18-bullseye-slim
+FROM node:22-alpine
+WORKDIR /usr/src/app
 
-WORKDIR /app
+RUN apk add --no-cache openssl
 
 COPY package*.json ./
+RUN npm install --omit=dev
 
-RUN npm install --production
-
-COPY prisma ./prisma
 COPY . .
 
 RUN npx prisma generate
 
-RUN npm run build
+EXPOSE 8080
 
-EXPOSE 4444
-
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]
